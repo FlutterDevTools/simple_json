@@ -129,6 +129,9 @@ void init() {
 
   String _generateHeader(List<ClassElement> elements) {
     return [
+      '''// GENERATED CODE - DO NOT MODIFY BY HAND''',
+      '''// Generated and consumed by 'simple_json' ''',
+      '',
       '''import 'package:simple_json/simple_json.dart';''',
       elements.map(_generateImport).join('\n')
     ].join('\n');
