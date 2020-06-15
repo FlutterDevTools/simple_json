@@ -10,6 +10,7 @@ void main() {
   final account = Account(
     name: 'Test',
     number: 'xxx12414',
+    amount: 100.50,
     transactionCount: 10,
     isActive: true,
   );

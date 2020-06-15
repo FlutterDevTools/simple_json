@@ -26,12 +26,13 @@ void main() {
 ```dart
 import 'package:simple_json/annotations.dart';
 
-// Required annotation/decorator to opt-in model for json setup. 
+// Required annotation/decorator to opt-in model for json setup.
 @JsonObject()
 class Account {
-  const Account({this.name, this.number, this.transactionCount, this.isActive});
+  const Account({this.name, this.number, this.amount, this.transactionCount, this.isActive});
   final String name;
   final String number;
+  final double amount;
   final int transactionCount;
   final bool isActive;
 }
@@ -42,6 +43,7 @@ class Account {
   final account = Account(
     name: 'Test',
     number: 'xxx12414',
+    amount: 100.50,
     transactionCount: 10,
     isActive: true,
   );

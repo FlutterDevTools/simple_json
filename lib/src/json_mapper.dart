@@ -19,11 +19,15 @@ class JsonMapper {
   }
 
   static Map<String, dynamic> serializeToMap<T>(T item) {
-    return (_mapper[T.toString()] as JsonObjectMapper<T>).toJsonMap(item);
+    return item != null
+        ? (_mapper[T.toString()] as JsonObjectMapper<T>).toJsonMap(item)
+        : null;
   }
 
   static T deserialize<T>(dynamic jsonVal) {
-    return (_mapper[T.toString()] as JsonObjectMapper<T>)
-        .fromJsonMap(jsonVal is String ? json.decode(jsonVal) : jsonVal);
+    return jsonVal != null
+        ? (_mapper[T.toString()] as JsonObjectMapper<T>)
+            .fromJsonMap(jsonVal is String ? json.decode(jsonVal) : jsonVal)
+        : null;
   }
 }
