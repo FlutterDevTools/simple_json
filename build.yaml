@@ -1,0 +1,7 @@
+builders:
+  simple_json:
+    import: "package:simple_json/builder.dart"
+    builder_factories: ["jsonMapperBuilder"]
+    build_extensions: { "$lib$": ["mapper.g.dart"] }
+    auto_apply: dependents
+    build_to: source

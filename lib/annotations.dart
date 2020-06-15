@@ -1,0 +1,3 @@
+class JsonObject {
+  const JsonObject();
+}
