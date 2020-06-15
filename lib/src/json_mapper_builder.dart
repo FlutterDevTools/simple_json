@@ -65,25 +65,27 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
   String _generateFromMapParameter(ParameterElement param) {
     final name = param.displayName;
     final type = param.type.toString();
-    final valueFn = (String type) => '''json['$name'] as ${type}''';
+    final valFn = ([String asType]) => '''json['$name'] as ${asType ?? type}''';
     var val;
     switch (type) {
       case 'DateTime':
-        val = 'DateTime.parse(${valueFn('String')})';
+        val = 'DateTime.parse(${valFn('String')})';
         break;
       default:
-        val = valueFn(type);
         break;
     }
     if (param.type.isDartCoreList) {
       final typeArgs = (param.type as InterfaceType).typeArguments;
       if (typeArgs.isNotEmpty && !isPrimitiveType(typeArgs.first)) {
-        val = '''(${valueFn('List')}).cast<Map<String, dynamic>>().map((item) => JsonMapper.deserialize<${typeArgs.first}>(item)).toList()''';
+        val =
+            '''(${valFn('List')}).cast<Map<String, dynamic>>().map((item) => ${_generateDeserialize('item', typeArgs.first)}).toList()''';
       } else {
-        val = '''(${valueFn('List')}).cast()''';
+        val = '''(${valFn('List')}).cast()''';
       }
+    } else if (!isPrimitiveType(param.type) && val == null) {
+      val = _generateDeserialize(valFn('Map<String, dynamic>'), param.type);
     }
-    return '''$name: $val,''';
+    return '''$name: ${val ?? valFn()},''';
   }
 
   String _generateToMapItem(ParameterElement param) {
@@ -95,16 +97,26 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
         val = '${valFn()}.toIso8601String()';
         break;
       default:
-        val = valFn();
         break;
     }
     if (param.type.isDartCoreList) {
       final typeArgs = (param.type as InterfaceType).typeArguments;
       if (typeArgs.isNotEmpty && !isPrimitiveType(typeArgs.first)) {
-        val += '''.map((item) => JsonMapper.serializeToMap(item)).toList()''';
+        val =
+            '''${valFn()}.map((item) => ${_generateSerialize('item', typeArgs.first)}).toList()''';
       }
+    } else if (!isPrimitiveType(param.type) && val == null) {
+      val = _generateSerialize(valFn(), param.type);
     }
-    return ''''$name': $val,''';
+    return ''''$name': ${val ?? valFn()},''';
+  }
+
+  String _generateSerialize(String val, DartType type) {
+    return 'JsonMapper.serializeToMap($val)';
+  }
+
+  String _generateDeserialize(String val, DartType type) {
+    return 'JsonMapper.deserialize<${type}>($val)';
   }
 
   bool isPrimitiveType(DartType type) {
