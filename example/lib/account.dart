@@ -1,4 +1,4 @@
-import 'package:simple_json/annotations.dart';
+import 'package:simple_json/simple_json.dart';
 
 @JsonObject()
 class Account {

@@ -1,7 +1,6 @@
-import 'package:simple_json/annotations.dart';
+import 'package:simple_json/simple_json.dart';
 import 'package:simple_json_usage/account.dart';
 import 'package:simple_json_usage/product.dart';
-import 'package:simple_json/builder.dart';
 
 import 'mapper.g.dart' as mapper;
 

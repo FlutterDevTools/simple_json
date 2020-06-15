@@ -5,7 +5,7 @@ import 'package:glob/glob.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:path/path.dart' as p;
 
-import '../annotations.dart';
+import 'annotations.dart';
 
 class JsonMapperBuilder implements Builder {
   const JsonMapperBuilder();
@@ -129,7 +129,7 @@ void init() {
 
   String _generateHeader(List<ClassElement> elements) {
     return [
-      '''import 'package:simple_json/builder.dart';''',
+      '''import 'package:simple_json/simple_json.dart';''',
       elements.map(_generateImport).join('\n')
     ].join('\n');
   }
