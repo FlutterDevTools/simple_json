@@ -1,6 +1,12 @@
 # simple_json
 Simple way to dynamically convert from and to JSON using build-time generators given a type.
 
+### Why?
+- Simple
+- No messy `.g.dart` files for each serializable file
+- Dynamic serialization and de-serialization without caring about the actual type
+- Model files stay clean and don't care about the serialization logic (SRP)
+
 ## Quick Start
 
 *pubspec.yaml*
