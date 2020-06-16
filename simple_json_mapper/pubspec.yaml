@@ -2,7 +2,7 @@ name: simple_json_mapper
 description: >-
   Classes and helper functions that support JSON code generation and serialization via the
   `simple_json` package.
-version: 0.1.0
+version: 0.1.1
 homepage: https://github.com/FlutterDevTools/simple_json
 
 environment:

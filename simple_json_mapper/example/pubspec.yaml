@@ -1,0 +1,11 @@
+name: simple_json_mapper_example
+description: simple_json_mapper example project
+version: 0.1.0
+homepage: https://github.com/FlutterDevTools/simple_json
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  simple_json_mapper:
+    path: ../
