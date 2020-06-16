@@ -2,10 +2,9 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
 import 'package:glob/glob.dart';
+import 'package:simple_json_mapper/simple_json_mapper.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:path/path.dart' as p;
-
-import 'annotations.dart';
 
 class JsonMapperBuilder implements Builder {
   const JsonMapperBuilder();
@@ -144,7 +143,7 @@ void init() {
       '''// GENERATED CODE - DO NOT MODIFY BY HAND''',
       '''// Generated and consumed by 'simple_json' ''',
       '',
-      '''import 'package:simple_json/simple_json.dart';''',
+      '''import 'package:simple_json_mapper/simple_json_mapper.dart';''',
       elements.map(_generateImport).join('\n')
     ].join('\n');
   }

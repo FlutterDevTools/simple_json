@@ -1,7 +1,7 @@
-import 'package:simple_json/simple_json.dart';
-import 'package:simple_json_usage/account.dart';
-import 'package:simple_json_usage/product.dart';
-import 'package:simple_json_usage/test.dart';
+import 'package:simple_json_mapper/simple_json_mapper.dart';
+import 'package:simple_json_example/account.dart';
+import 'package:simple_json_example/product.dart';
+import 'package:simple_json_example/test.dart';
 
 import 'mapper.g.dart' as mapper;
 

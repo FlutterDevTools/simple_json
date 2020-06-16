@@ -1,13 +1,13 @@
 name: simple_json
 description: Simple way to dynamically convert from and to JSON using build-time generators given a type.
 version: 0.1.0
-author: D10100111001
 homepage: https://github.com/FlutterDevTools/simple_json
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
+  simple_json_mapper: ^0.1.0
   build_resolvers: ^1.3.0
   analyzer: ">=0.37.0 <0.40.0"
   build: ^1.3.0

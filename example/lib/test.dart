@@ -1,4 +1,4 @@
-import 'package:simple_json/simple_json.dart';
+import 'package:simple_json_mapper/simple_json_mapper.dart';
 
 @JsonObject()
 class Test {

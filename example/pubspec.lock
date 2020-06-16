@@ -368,9 +368,16 @@ packages:
   simple_json:
     dependency: "direct dev"
     description:
-      path: ".."
+      path: "..\\simple_json"
       relative: true
     source: path
+    version: "0.1.0"
+  simple_json_mapper:
+    dependency: "direct main"
+    description:
+      name: simple_json_mapper
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "0.1.0"
   source_gen:
     dependency: transitive

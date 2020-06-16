@@ -1,5 +1,5 @@
-import 'package:simple_json/simple_json.dart';
-import 'package:simple_json_usage/test.dart';
+import 'package:simple_json_mapper/simple_json_mapper.dart';
+import 'package:simple_json_example/test.dart';
 
 @JsonObject()
 class Product {
