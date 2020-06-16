@@ -9,10 +9,11 @@ Simple way to dynamically convert from and to JSON using build-time generators g
 
 ## Quick Start
 
-*pubspec.yaml*
+*pubspec.yaml* (_Note_: This should be added under `dev_dependencies`)
 ```yaml
-simple_json: ^0.1.0
-build_runner: ^1.10.0
+dev_dependencies:
+  simple_json: ^0.1.0
+  build_runner: ^1.10.0
 ```
 
 ### Setup
