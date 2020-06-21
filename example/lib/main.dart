@@ -17,12 +17,14 @@ void main() {
     ],
   );
   final account = Account(
+    type: AccountType.Checking,
     name: 'Test',
     number: 'xxx12414',
     amount: 100.50,
     transactionCount: 10,
     isActive: true,
     product: product,
+    localText: 'ignored text',
   );
   final serializedAccount = JsonMapper.serialize(account);
   print(serializedAccount);
