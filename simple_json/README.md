@@ -21,7 +21,7 @@ Simple way to dynamically convert from and to JSON using build-time generators g
 Dynamic serialization and de-serialization allows for allow for creating great type-safe APIs. A good example is a simple storage service in flutter.
 
 <details>
-  <summary>storage_service.dart<summary>
+  <summary>storage_service.dart</summary>
 
 ```dart
 class StorageService implements IStorageService {
@@ -71,7 +71,7 @@ dependencies:
   simple_json_mapper: ^0.1.6
 
 dev_dependencies:
-  simple_json: ^0.1.4
+  simple_json: ^0.1.5
   build_runner: ^1.10.0
 ```
 
