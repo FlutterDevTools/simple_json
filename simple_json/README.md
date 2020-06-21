@@ -2,7 +2,7 @@
 Simple way to dynamically convert from and to JSON using build-time generators given a type.
 
 ### How?
-1. A single `mapper.g.dart` is generated at build-time when the `build_runner build` command is executed. [View example of generated file](simple_json/example/lib/mapper.g.dart). [Advanced example](example/lib/mapper.g.dart)
+1. A single `mapper.g.dart` is generated at build-time when the `build_runner build` command is executed. [View example of generated file](example/lib/mapper.g.dart). [Advanced example](../example/lib/mapper.g.dart)
 2. This generated file contains the necessary code (serialization and de-serialization logic) to map from and to JSON. 
 3. These object mappers are registered with the JSON Mapper in the init function.
 4. The init function is the first line of code that should be executed in your `main.dart` file.
@@ -24,7 +24,7 @@ dependencies:
   simple_json_mapper: ^0.1.6
 
 dev_dependencies:
-  simple_json: ^0.1.1
+  simple_json: ^0.1.3
   build_runner: ^1.10.0
 ```
 
