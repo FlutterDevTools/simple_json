@@ -6,9 +6,10 @@ environment:
 dependencies:
   simple_json_mapper: ^0.1.6
 
+
 dev_dependencies:
   build_runner: ^1.10.0
   build_verify: ^1.1.1
+  test: ^1.14.7
   simple_json:
     path: ../simple_json
-  test: ^1.14.7

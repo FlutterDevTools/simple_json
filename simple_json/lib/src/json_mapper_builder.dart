@@ -50,7 +50,8 @@ class JsonMapperBuilder implements Builder {
             .map((optedClasses) => optedClasses.thisType)
             .toSet());
     print(
-        'WARNING: Generated mappings for the following unmarked (but linked) types: ${unmappedTypes.toString()}');
+        'WARNING: Generated mappings for the following unannotated types: ${unmappedTypes.map((t) => t.toString()).join(', ')}');
+        
     final unmappedElements =
         unmappedTypes.map((t) => t.element as ClassElement).toList();
     mappers.addAll(unmappedElements.map((c) => _generateMapper(c)));

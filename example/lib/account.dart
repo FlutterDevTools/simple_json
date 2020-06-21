@@ -1,18 +1,26 @@
 import 'package:simple_json_mapper/simple_json_mapper.dart';
 import 'package:simple_json_example/product.dart';
 
+class BaseAccount {
+  const BaseAccount({this.openDate});
+  @JProp(name: 'openingDate')
+  final DateTime openDate;
+}
+
 @JObj()
-class Account {
-  const Account({
-    this.type,
-    this.name,
-    this.number,
-    this.amount,
-    this.transactionCount,
-    this.isActive,
-    this.product,
-    this.localText,
-  });
+class Account extends BaseAccount {
+  const Account(
+      {this.type,
+      this.name,
+      this.number,
+      this.amount,
+      this.transactionCount,
+      this.isActive,
+      this.product,
+      this.localText,
+      DateTime openDate})
+      : super(openDate: openDate);
+      
   @JEnumProp(serializationType: SerializationType.Index)
   final AccountType type;
   final String name;
