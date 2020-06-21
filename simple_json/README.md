@@ -1,6 +1,8 @@
 # simple_json
 Simple way to dynamically convert from and to JSON using build-time generators given a type.
 
+**Note**: Ignore the warning and tags indicating that this package is no compatible with the Flutter and other SDKs. This is reported because this generator package uses `dart:mirrors` library which is not supported by those SDKs. In this case, it will all work fine as this package is supposed to be just build-time generators. This package should **ONLY** be added under `dev_dependencies` to work correctly. The supporting [simple_json_mapper](https://pub.dev/packages/simple_json_mapper) package also needs to be included but as a regular dependency under `dependencies`. 
+
 ### How?
 1. A single `mapper.g.dart` is generated at build-time when the `build_runner build` command is executed. [View example of generated file](example/lib/mapper.g.dart). [Advanced example](../example/lib/mapper.g.dart)
 2. This generated file contains the necessary code (serialization and de-serialization logic) to map from and to JSON. 
@@ -11,25 +13,70 @@ Simple way to dynamically convert from and to JSON using build-time generators g
 ### Why?
 - Simple
 - No messy `.g.dart` files for each serializable file (single root-level file which contains all of the generated code)
-- Dynamic serialization and de-serialization without caring about the actual type
+- Dynamic serialization and de-serialization without using the actual type directly while still maintaining type-safety. i.e. `JsonMapper.serialize(account)` vs `account.toJson()` (account does not need to have any logic and it is not used directly for the actual serialization)
 - Model files stay clean (no extra generated code) and don't care about the serialization logic (SRP)
 - No need to specify custom object and iterable type casting
 - No bloated reflection on the entire type with linting/analyzer issues
 
+Dynamic serialization and de-serialization allows for allow for creating great type-safe APIs. A good example is a simple storage service in flutter.
+
+<details>
+  <summary>storage_service.dart<summary>
+
+```dart
+class StorageService implements IStorageService {
+  const StorageService(this.preferences);
+  final SharedPreferences preferences;
+
+  @override
+  Future<T> get<T>({T Function() defaultFn, bool private = false}) async {
+    return getWithKey(T.toString(), defaultFn: defaultFn, private: private);
+  }
+
+  @override
+  Future<T> getWithKey<T>(String key,
+      {T Function() defaultFn, bool private = false}) async {
+    return JsonMapper.deserialize<T>(
+            await getProvider(private).getString(key)) ??
+        defaultFn();
+  }
+
+  @override
+  Future<bool> set<T>(T value, [bool private = false]) {
+    return setWithKey(T.toString(), value, private);
+  }
+
+  @override
+  Future<bool> setWithKey<T>(String key, T value, [bool private = false]) {
+    return getProvider(private).setString(key, JsonMapper.serialize(value));
+  }
+
+  IStorageProvider getProvider(bool private) {
+    return private && !AppUtils.isWeb
+        ? SecureStorage()
+        : SharedPreferencesStorage(preferences);
+  }
+}
+
+```
+</details>
+
+Using `simple_json`, this `StorageService` has a simple generic type-safe API that can store serialize the models classes before storing them as string making it really simple and boilerplate-free.
+
 ## Quick Start
 
-<u>pubspec.yaml</u> (**Note**: `simple_json` must be added under `dev_dependencies`)
+pubspec.yaml (**Note**: `simple_json` must be added under `dev_dependencies`)
 ```yaml
 dependencies:
   simple_json_mapper: ^0.1.6
 
 dev_dependencies:
-  simple_json: ^0.1.3
+  simple_json: ^0.1.4
   build_runner: ^1.10.0
 ```
 
 ### Setup
-<u>main.dart</u>
+main.dart
 ```dart
 // Generated file. Can be added to .gitignore
 import 'mapper.g.dart' as mapper;
