@@ -1,3 +1,6 @@
+## 0.1.2 - 06/21/2020
+* Update README links.
+
 ## 0.1.1 - 06/21/2020
 * Update README and unannotated, linked class warning message.
 
