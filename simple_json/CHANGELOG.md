@@ -1,3 +1,10 @@
+## 0.2.1 - 06/24/2020
+* Update README. 
+
+## 0.2.0 - 06/24/2020
+* Add support for custom json mappers, converters, and super classes.
+* Edge case bug fixes.
+
 ## 0.1.5 - 06/21/2020
 * Update README.
 

@@ -371,14 +371,14 @@ packages:
       path: "..\\simple_json"
       relative: true
     source: path
-    version: "0.1.5"
+    version: "0.2.0"
   simple_json_mapper:
     dependency: "direct main"
     description:
       path: "..\\simple_json_mapper"
       relative: true
     source: path
-    version: "0.1.6"
+    version: "0.2.0"
   source_gen:
     dependency: transitive
     description:

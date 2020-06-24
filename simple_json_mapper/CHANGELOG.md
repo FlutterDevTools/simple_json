@@ -1,3 +1,9 @@
+## 0.2.1 - 06/24/2020
+* Update README. 
+
+## 0.2.0 - 06/24/2020
+* Add support for custom json mapper and converters. 
+
 ## 0.1.6 - 06/15/2020
 * Fix unintentionally hidden annotations.
 
