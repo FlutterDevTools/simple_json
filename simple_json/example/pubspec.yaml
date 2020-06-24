@@ -7,7 +7,7 @@ environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
-  simple_json_mapper: ^0.2.1
+  simple_json_mapper: ^0.2.2
   simple_json:
     path: ../
 

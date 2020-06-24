@@ -315,14 +315,14 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.2.0"
+    version: "0.2.2"
   simple_json_mapper:
     dependency: "direct main"
     description:
       path: "..\\..\\simple_json_mapper"
       relative: true
     source: path
-    version: "0.2.0"
+    version: "0.2.2"
   source_gen:
     dependency: transitive
     description:

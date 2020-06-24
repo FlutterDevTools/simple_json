@@ -68,10 +68,10 @@ Using `simple_json`, this `StorageService` has a simple generic type-safe API th
 pubspec.yaml (**Note**: `simple_json` must be added under `dev_dependencies`)
 ```yaml
 dependencies:
-  simple_json_mapper: ^0.2.1
+  simple_json_mapper: ^0.2.2
 
 dev_dependencies:
-  simple_json: ^0.2.1
+  simple_json: ^0.2.2
   build_runner: ^1.10.0
 ```
 
@@ -215,7 +215,7 @@ enum AccountType {
   print(customMapper.serialize(account));
 ```
 
-**Refer to the [advanced example](../example/lib/mapper.g.dart) for advanced usage of functionalities.**
+**Refer to the [advanced example](../example/lib/main.dart) for advanced usage of functionalities.**
 
 ### Generating Mapper File
 

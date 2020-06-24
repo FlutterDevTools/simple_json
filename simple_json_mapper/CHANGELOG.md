@@ -1,3 +1,6 @@
+## 0.2.2 - 06/24/2020
+* Keep version in sync with `simple_json`. 
+
 ## 0.2.1 - 06/24/2020
 * Update README. 
 
