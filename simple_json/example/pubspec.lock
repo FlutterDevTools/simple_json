@@ -315,13 +315,13 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.1.0"
+    version: "0.1.5"
   simple_json_mapper:
     dependency: "direct main"
     description:
-      name: simple_json_mapper
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "..\\..\\simple_json_mapper"
+      relative: true
+    source: path
     version: "0.1.6"
   source_gen:
     dependency: transitive

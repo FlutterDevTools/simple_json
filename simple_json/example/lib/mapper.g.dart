@@ -5,11 +5,11 @@ import 'package:simple_json_mapper/simple_json_mapper.dart';
 import 'package:simple_json_example/main.dart';
 
 final _testMapper = JsonObjectMapper(
-  (Map<String, dynamic> json) => Test(
-    name: json['name'] as String,
+  (CustomJsonMapper mapper, Map<String, dynamic> json) => Test(
+    name: mapper.applyFromJsonConverter(json['name']),
   ),
-  (Test instance) => <String, dynamic>{
-    'name': instance.name,
+  (CustomJsonMapper mapper, Test instance) => <String, dynamic>{
+    'name': mapper.applyFromInstanceConverter(instance.name),
   },
 );
 

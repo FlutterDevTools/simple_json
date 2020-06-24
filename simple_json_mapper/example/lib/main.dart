@@ -1,12 +1,12 @@
 import 'package:simple_json_mapper/simple_json_mapper.dart';
 
 void main() {
-  // The registration is normally done automatically by the generator (simple_json package) 
+  // The registration is normally done automatically by the generator (simple_json package)
   JsonMapper.register(JsonObjectMapper<Test>(
-    (map) => Test(
+    (mapper, map) => Test(
       name: map['name'] as String,
     ),
-    (instance) => {
+    (mapper, instance) => {
       'name': instance.name,
     },
   ));

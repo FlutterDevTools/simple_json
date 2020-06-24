@@ -5,7 +5,11 @@ environment:
 
 dependencies:
   simple_json_mapper: ^0.1.6
+  uuid: ^2.1.0
 
+dependency_overrides:
+  simple_json_mapper:
+    path: ../simple_json_mapper
 
 dev_dependencies:
   build_runner: ^1.10.0

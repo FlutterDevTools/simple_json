@@ -15,6 +15,10 @@ dependencies:
   path: ^1.7.0
   glob: ^1.2.0
 
+dependency_overrides:
+  simple_json_mapper:
+    path: ../simple_json_mapper
+
 dev_dependencies:
   test: ^1.14.7
   build_runner: ^1.10.0

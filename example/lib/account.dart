@@ -1,16 +1,23 @@
+import 'package:simple_json_example/converters/special_datetime.dart';
 import 'package:simple_json_mapper/simple_json_mapper.dart';
 import 'package:simple_json_example/product.dart';
 
 class BaseAccount {
-  const BaseAccount({this.openDate});
+  const BaseAccount({this.openDate, this.closedDate});
   @JProp(name: 'openingDate')
   final DateTime openDate;
+
+  // Converter directly applied to a field. Takes precedence over all converter configurations
+  @SpecialDateTimeConverter(true)
+  final DateTime closedDate;
+  
 }
 
 @JObj()
 class Account extends BaseAccount {
   const Account(
-      {this.type,
+      {this.id,
+      this.type,
       this.name,
       this.number,
       this.amount,
@@ -18,9 +25,11 @@ class Account extends BaseAccount {
       this.isActive,
       this.product,
       this.localText,
+      DateTime closedDate,
       DateTime openDate})
-      : super(openDate: openDate);
-      
+      : super(openDate: openDate, closedDate: closedDate);
+
+  final String id;
   @JEnumProp(serializationType: SerializationType.Index)
   final AccountType type;
   final String name;

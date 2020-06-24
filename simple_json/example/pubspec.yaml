@@ -11,5 +11,9 @@ dependencies:
   simple_json:
     path: ../
 
+dependency_overrides:
+  simple_json_mapper:
+    path: ../../simple_json_mapper
+
 dev_dependencies:
   build_runner: ^1.10.0

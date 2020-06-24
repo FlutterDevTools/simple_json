@@ -5,55 +5,60 @@ import 'package:simple_json_mapper/simple_json_mapper.dart';
 import 'package:simple_json_example/account.dart';
 import 'package:simple_json_example/product.dart';
 import 'package:simple_json_example/test.dart';
+import 'package:simple_json_example/converters/special_datetime.dart';
 
 final _accountMapper = JsonObjectMapper(
-  (Map<String, dynamic> json) => Account(
-    type: AccountType.values.firstWhere(
+  (CustomJsonMapper mapper, Map<String, dynamic> json) => Account(
+    id: mapper.applyFromJsonConverter(json['id']),
+    type: mapper.applyFromJsonConverter(AccountType.values.firstWhere(
         (item) => ({0: 25, 1: 10}[item.index] ?? item.index) == json['type'],
-        orElse: () => null),
-    name: json['name'] as String,
-    number: json['number'] as String,
-    amount: json['amount'] as double,
-    transactionCount: (json['tranCount'] ?? 11) as int,
-    isActive: json['isActive'] as bool,
-    product: JsonMapper.deserialize<Product>(json['product'] as Map<String, dynamic>),
-    openDate: DateTime.parse(json['openDate'] as String),
+        orElse: () => null)),
+    name: mapper.applyFromJsonConverter(json['name']),
+    number: mapper.applyFromJsonConverter(json['number']),
+    amount: mapper.applyFromJsonConverter(json['amount']),
+    transactionCount: mapper.applyFromJsonConverter(json['tranCount']) ?? 11,
+    isActive: mapper.applyFromJsonConverter(json['isActive']),
+    product: mapper.deserialize<Product>(json['product'] as Map<String, dynamic>),
+    closedDate: mapper.applyFromJsonConverter(json['closedDate'], SpecialDateTimeConverter(true)),
+    openDate: mapper.applyFromJsonConverter(json['openingDate']),
   ),
-  (Account instance) => <String, dynamic>{
-    'type': ({0: 25, 1: 10}[instance.type.index] ?? instance.type.index),
-    'name': instance.name,
-    'number': instance.number,
-    'amount': instance.amount,
-    'tranCount': instance.transactionCount ?? 11,
-    'isActive': instance.isActive,
-    'product': JsonMapper.serializeToMap(instance.product),
-    'openDate': instance.openDate.toIso8601String(),
+  (CustomJsonMapper mapper, Account instance) => <String, dynamic>{
+    'id': mapper.applyFromInstanceConverter(instance.id),
+    'type': mapper.applyFromInstanceConverter(({0: 25, 1: 10}[instance.type.index] ?? instance.type.index)),
+    'name': mapper.applyFromInstanceConverter(instance.name),
+    'number': mapper.applyFromInstanceConverter(instance.number),
+    'amount': mapper.applyFromInstanceConverter(instance.amount),
+    'tranCount': mapper.applyFromInstanceConverter(instance.transactionCount ?? 11),
+    'isActive': mapper.applyFromInstanceConverter(instance.isActive),
+    'product': mapper.serializeToMap(instance.product),
+    'closedDate': mapper.applyFromInstanceConverter(instance.closedDate, SpecialDateTimeConverter(true)),
+    'openingDate': mapper.applyFromInstanceConverter(instance.openDate),
   },
 );
 
 
 final _productMapper = JsonObjectMapper(
-  (Map<String, dynamic> json) => Product(
-    name: json['name'] as String,
-    expiry: DateTime.parse(json['expiry'] as String),
-    sizes: (json['sizes'] as List).cast(),
-    tests: (json['tests'] as List).cast<Map<String, dynamic>>().map((item) => JsonMapper.deserialize<Test>(item)).toList(),
+  (CustomJsonMapper mapper, Map<String, dynamic> json) => Product(
+    name: mapper.applyFromJsonConverter(json['name']),
+    expiry: mapper.applyFromJsonConverter(json['expiry']),
+    sizes: (json['sizes'] as List).cast<int>().map((item) => mapper.applyFromJsonConverter<int>(item)).toList(),
+    tests: (json['tests'] as List).cast<Map<String, dynamic>>().map((item) => mapper.deserialize<Test>(item)).toList(),
   ),
-  (Product instance) => <String, dynamic>{
-    'name': instance.name,
-    'expiry': instance.expiry.toIso8601String(),
-    'sizes': instance.sizes,
-    'tests': instance.tests.map((item) => JsonMapper.serializeToMap(item)).toList(),
+  (CustomJsonMapper mapper, Product instance) => <String, dynamic>{
+    'name': mapper.applyFromInstanceConverter(instance.name),
+    'expiry': mapper.applyFromInstanceConverter(instance.expiry),
+    'sizes': mapper.applyFromInstanceConverter(instance.sizes),
+    'tests': instance.tests.map((item) => mapper.serializeToMap(item)).toList(),
   },
 );
 
 
 final _testMapper = JsonObjectMapper(
-  (Map<String, dynamic> json) => Test(
-    name: json['name'] as String,
+  (CustomJsonMapper mapper, Map<String, dynamic> json) => Test(
+    name: mapper.applyFromJsonConverter(json['name']),
   ),
-  (Test instance) => <String, dynamic>{
-    'name': instance.name,
+  (CustomJsonMapper mapper, Test instance) => <String, dynamic>{
+    'name': mapper.applyFromInstanceConverter(instance.name),
   },
 );
 

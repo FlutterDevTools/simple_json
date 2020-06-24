@@ -182,6 +182,41 @@ enum AccountType {
   final account = JsonMapper.deserialize<Account>(accountJson);
 ```
 
+### Converters
+
+```dart
+  // Convert all deserialized strings to lowercase and all serialized strings to uppercase.
+  JsonMapper.registerConverter(
+    JsonConverter<String, String>.fromFunction(
+      fromJson: (value) => value.toLowerCase(),
+      toJson: (value) => value.toUpperCase(),
+    ),
+  );
+
+  // Converter for transforming all DateTime string values to a special format defined by the given class.
+  JsonMapper.registerConverter(SpecialDateTimeConverter());
+```
+
+#### Custom JsonMapper
+
+```dart
+  // Custom mapper that has it own set of converters. Useful for encapsulating for special, adhoc serializations
+  // e.g. SQLite
+  final customMapper = CustomJsonMapper(
+    converters: [
+      // Converter for changing all boolean values from boolean to int and vice versa on serialization.
+      JsonConverter<int, bool>.fromFunction(
+        fromJson: (value) => value == 1 ? true : false,
+        toJson: (value) => value ? 1 : 0,
+      ),
+    ],
+  );
+  // Note the usage of [customerMapper] here.
+  print(customMapper.serialize(account));
+```
+
+**Refer to the [advanced example](../example/lib/mapper.g.dart) for advanced usage of functionalities.**
+
 ### Generating Mapper File
 
 *build*

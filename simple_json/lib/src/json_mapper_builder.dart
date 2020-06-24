@@ -1,3 +1,5 @@
+import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
@@ -14,6 +16,7 @@ class JsonMapperBuilder implements Builder {
   static final _allFilesInLib = new Glob('lib/**');
 
   final processedTypes = Set<DartType>();
+  final usedElements = Set<Element>();
 
   @override
   Map<String, List<String>> get buildExtensions {
@@ -51,13 +54,13 @@ class JsonMapperBuilder implements Builder {
             .toSet());
     print(
         'WARNING: Generated mappings for the following unannotated types: ${unmappedTypes.map((t) => t.toString()).join(', ')}');
-        
+
     final unmappedElements =
         unmappedTypes.map((t) => t.element as ClassElement).toList();
     mappers.addAll(unmappedElements.map((c) => _generateMapper(c)));
 
     final classes = [...classesInLibrary, ...unmappedElements];
-    final imports = _generateHeader(classes);
+    final imports = _generateHeader([...classes, ...usedElements]);
     final registrations = _generateInit(classes);
 
     lines.add(imports);
@@ -73,10 +76,10 @@ class JsonMapperBuilder implements Builder {
     return '''
 
 final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
-  (Map<String, dynamic> json) => ${elementName}(
+  (CustomJsonMapper mapper, Map<String, dynamic> json) => ${elementName}(
     ${parameters.map(_generateFromMapItem).where((line) => line != null).join('\n    ')}
   ),
-  (${elementName} instance) => <String, dynamic>{
+  (CustomJsonMapper mapper, ${elementName} instance) => <String, dynamic>{
     ${parameters.map(_generateToMapItem).where((line) => line != null).join('\n    ')}
   },
 );
@@ -84,44 +87,42 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
   }
 
   String _generateFromMapItem(ParameterElement param) {
+    final converterProp = getConverterProp(param);
     final prop = getProp(param);
     if (prop.ignore) return null;
     final name = param.displayName;
     final jsonName = prop.name ?? name;
-    final type = param.type.toString();
+    final accessorStr = "json['$jsonName']";
+    final converterWrapper = (String val, [String type]) =>
+        'mapper.applyFromJsonConverter${type != null ? '<$type>' : ''}($val${converterProp != null ? ', $converterProp' : ''})';
     final valFn = ([String asType]) {
-      var accessorStr = "json['$jsonName']";
-      if (prop.defaultValue != null) {
-        accessorStr = '($accessorStr ?? ${prop.defaultValue.toString()})';
-      }
-      return '''$accessorStr as ${asType ?? type}''';
+      final accStr =
+          asType == null ? converterWrapper(accessorStr) : accessorStr;
+      return '''$accStr${asType != null ? ' as $asType' : ''}''';
     };
     var val;
-    switch (type) {
-      case 'DateTime':
-        val = 'DateTime.parse(${valFn('String')})';
-        break;
-      default:
-        break;
-    }
     if (param.type.isDartCoreList) {
       final typeArgs = (param.type as InterfaceType).typeArguments;
-      if (typeArgs.isNotEmpty && !isPrimitiveType(typeArgs.first)) {
-        processedTypes.add(typeArgs.first);
+      final firstTypeArg = typeArgs.isNotEmpty ? typeArgs.first : null;
+      if (!isPrimitiveType(firstTypeArg)) {
+        processedTypes.add(firstTypeArg);
         val =
-            '''(${valFn('List')}).cast<Map<String, dynamic>>().map((item) => ${_generateDeserialize('item', typeArgs.first)}).toList()''';
+            '''(${valFn('List')}).cast<Map<String, dynamic>>().map((item) => ${_generateDeserialize('item', firstTypeArg)}).toList()''';
       } else {
-        val = '''(${valFn('List')}).cast()''';
+        val =
+            '''(${valFn('List')}).cast<${firstTypeArg.toString()}>().map((item) => ${converterWrapper('item', firstTypeArg.toString())}).toList()''';
       }
     } else if (isParamFieldFormal(param) && isParamEnum(param)) {
       final enumProp = getEnumProp(param);
       final enumValueMap = cleanMap(getEnumValueMap(param, enumProp));
-      val = _generateEnumFromMap(param, enumProp, enumValueMap);
-    } else if (!isPrimitiveType(param.type) && val == null) {
+      val = converterWrapper(_generateEnumFromMap(param, enumProp, enumValueMap));
+    } else if (!isPrimitiveType(param.type) &&
+        !isSkippedType(param.type) &&
+        val == null) {
       processedTypes.add(param.type);
       val = _generateDeserialize(valFn('Map<String, dynamic>'), param.type);
     }
-    return '''$name: ${val ?? valFn()},''';
+    return '''$name: ${val ?? valFn()}${prop.defaultValue != null ? ' ?? ${prop.defaultValue.toString()}' : ''},''';
   }
 
   String _generateEnumFromMap(ParameterElement param, JsonEnumProperty enumProp,
@@ -135,36 +136,41 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
   }
 
   String _generateToMapItem(ParameterElement param) {
+    final converterProp = getConverterProp(param);
     final prop = getProp(param);
     if (prop.ignore) return null;
     final name = param.displayName;
     final jsonName = prop.name ?? name;
+    final converterWrapper = (String val, [String type]) =>
+        'mapper.applyFromInstanceConverter${type != null ? '<$type>' : ''}($val${converterProp != null ? ', $converterProp' : ''})';
     final valFn = () => 'instance.${name}';
     var val;
-    switch (param.type.toString()) {
-      case 'DateTime':
-        val = '${valFn()}.toIso8601String()';
-        break;
-      default:
-        break;
-    }
+    var useTransform = converterProp != null;
+
     if (param.type.isDartCoreList) {
       final typeArgs = (param.type as InterfaceType).typeArguments;
-      if (typeArgs.isNotEmpty && !isPrimitiveType(typeArgs.first)) {
-        processedTypes.add(typeArgs.first);
+      final firstTypeArg = typeArgs.isNotEmpty ? typeArgs.first : null;
+      if (!isPrimitiveType(firstTypeArg)) {
+        processedTypes.add(firstTypeArg);
         val =
-            '''${valFn()}.map((item) => ${_generateSerialize('item', typeArgs.first)}).toList()''';
+            '''${valFn()}.map((item) => ${_generateSerialize('item', firstTypeArg)}).toList()''';
       }
     } else if (isParamFieldFormal(param) && isParamEnum(param)) {
       final enumProp = getEnumProp(param);
       final enumValueMap = cleanMap(getEnumValueMap(param, enumProp));
       val = _generateMapLookup(
           enumValueMap, '${valFn()}${_generateEnumToMap(param, enumProp)}');
-    } else if (!isPrimitiveType(param.type) && val == null) {
+      useTransform = true;
+    } else if (!isPrimitiveType(param.type) &&
+        !isSkippedType(param.type) &&
+        val == null) {
       processedTypes.add(param.type);
       val = _generateSerialize(valFn(), param.type);
     }
-    return ''''$jsonName': ${val ?? valFn()}${prop.defaultValue != null ? ' ?? ${prop.defaultValue.toString()}' : ''},''';
+    if (val == null) useTransform = true;
+    val =
+        "${val ?? valFn()}${prop.defaultValue != null ? ' ?? ${prop.defaultValue.toString()}' : ''}";
+    return ''''$jsonName': ${useTransform ? converterWrapper(val) : val},''';
   }
 
   String _generateEnumToMap(ParameterElement param, JsonEnumProperty enumProp) {
@@ -175,13 +181,45 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
     return map.isNotEmpty ? '''(${map.toString()}[${val}] ?? ${val})''' : val;
   }
 
+  FieldElement getMatchingSuperProp(ParameterElement param) {
+    var superElement = (param.enclosingElement as ConstructorElement)
+        .enclosingElement
+        .supertype
+        ?.element;
+    while (superElement != null) {
+      final field = superElement?.fields
+          ?.firstWhere((f) => f.displayName == param.name, orElse: () => null);
+      if (field != null)
+        return field;
+      else
+        superElement = superElement.supertype?.element;
+    }
+    return null;
+  }
+
+  DartObject getPropObject(ParameterElement param, Type annotationType,
+      {bool getBase = true}) {
+    final propChecker = TypeChecker.fromRuntime(annotationType);
+    final field = param.isInitializingFormal
+        ? (param as FieldFormalParameterElement).field
+        : getMatchingSuperProp(param);
+    final jsonPropType =
+        field != null ? propChecker.firstAnnotationOf(field) : null;
+    DartObject obj = jsonPropType;
+    if (getBase) {
+      while (true) {
+        final newObj = obj?.getField('(super)');
+        if (newObj != null)
+          obj = newObj;
+        else
+          break;
+      }
+    }
+    return obj;
+  }
+
   JsonProperty getProp(ParameterElement param) {
-    final propChecker = TypeChecker.fromRuntime(JsonProperty);
-    final jsonPropType = param.isInitializingFormal
-        ? propChecker
-            .firstAnnotationOf((param as FieldFormalParameterElement).field)
-        : null;
-    final fieldMap = jsonPropType?.getField('(super)') ?? jsonPropType;
+    final fieldMap = getPropObject(param, JsonProperty);
     final jsonProp = JsonProperty(
       ignore: fieldMap?.getField('ignore')?.toBoolValue() ?? false,
       name: fieldMap?.getField('name')?.toStringValue(),
@@ -191,13 +229,32 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
     return jsonProp;
   }
 
+  String getConverterProp(ParameterElement param, [DartObject obj]) {
+    final obj = getPropObject(param, JsonConverter, getBase: false);
+    if (obj == null) return null;
+    final element = (obj.type?.element as ClassElement);
+    if (element == null) return null;
+    usedElements.add(element);
+    final params = element.unnamedConstructor?.parameters;
+    final getValue = (ParameterElement p) => obj.getField(p.displayName);
+    final valueFn = (ParameterElement p) =>
+        p != null ? ConstantReader(getValue(p)).literalValue : null;
+    final positionalParams = params
+        .where((p) => p.isPositional && getValue(p) != null)
+        .map((p) => valueFn(p))
+        .toList();
+    final namedParams = params
+        .where((p) => p.isNamed && getValue(p) != null)
+        .map((p) => '${p.displayName}: ${valueFn(p)}')
+        .toList();
+    return '${element.name}(${[
+      ...positionalParams,
+      ...namedParams
+    ].join(', ')})';
+  }
+
   JsonEnumProperty getEnumProp(ParameterElement param) {
-    final propChecker = TypeChecker.fromRuntime(JsonEnumProperty);
-    final jsonPropType = param.isInitializingFormal
-        ? propChecker
-            .firstAnnotationOf((param as FieldFormalParameterElement).field)
-        : null;
-    final fieldMap = jsonPropType?.getField('(super)') ?? jsonPropType;
+    final fieldMap = getPropObject(param, JsonEnumProperty);
     final jsonProp = JsonEnumProperty(
       serializationType: fieldMap != null
           ? SerializationType.values.firstWhere((val) =>
@@ -249,19 +306,24 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
   }
 
   String _generateSerialize(String val, DartType type) {
-    return 'JsonMapper.serializeToMap($val)';
+    return 'mapper.serializeToMap($val)';
   }
 
   String _generateDeserialize(String val, DartType type) {
-    return 'JsonMapper.deserialize<${type}>($val)';
+    return 'mapper.deserialize<${type}>($val)';
   }
 
   bool isPrimitiveType(DartType type) {
-    return type.isDartCoreBool ||
-        type.isDartCoreDouble ||
-        type.isDartCoreInt ||
-        type.isDartCoreNum ||
-        type.isDartCoreString;
+    return type != null &&
+        (type.isDartCoreBool ||
+            type.isDartCoreDouble ||
+            type.isDartCoreInt ||
+            type.isDartCoreNum ||
+            type.isDartCoreString);
+  }
+
+  bool isSkippedType(DartType type) {
+    return type != null && {'DateTime'}.contains(type.toString());
   }
 
   bool isParamFieldFormal(ParameterElement param) {
@@ -284,7 +346,7 @@ void init() {
     return '''JsonMapper.register(_${element.displayName.toLowerCase()}Mapper);''';
   }
 
-  String _generateHeader(List<ClassElement> elements) {
+  String _generateHeader(List<Element> elements) {
     return [
       '''// GENERATED CODE - DO NOT MODIFY BY HAND''',
       '''// Generated and consumed by 'simple_json' ''',
@@ -294,7 +356,7 @@ void init() {
     ].join('\n');
   }
 
-  String _generateImport(ClassElement element) {
+  String _generateImport(Element element) {
     return '''import '${element.library.identifier}';''';
   }
 
