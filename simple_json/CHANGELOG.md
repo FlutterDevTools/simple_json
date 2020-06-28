@@ -1,4 +1,4 @@
-## 0.2.3 - 06/28/2020
+## 0.2.4 - 06/28/2020
 * Added external type serialization support.
 
 ## 0.2.3 - 06/28/2020
