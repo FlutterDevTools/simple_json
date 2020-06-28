@@ -115,7 +115,8 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
     } else if (isParamFieldFormal(param) && isParamEnum(param)) {
       final enumProp = getEnumProp(param);
       final enumValueMap = cleanMap(getEnumValueMap(param, enumProp));
-      val = converterWrapper(_generateEnumFromMap(param, enumProp, enumValueMap));
+      val =
+          converterWrapper(_generateEnumFromMap(param, enumProp, enumValueMap));
     } else if (!isPrimitiveType(param.type) &&
         !isSkippedType(param.type) &&
         val == null) {
@@ -127,11 +128,11 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
 
   String _generateEnumFromMap(ParameterElement param, JsonEnumProperty enumProp,
       Map<dynamic, dynamic> enumValueMap) {
-    final value = enumProp.serializationType == SerializationType.Index
-        ? 'item.index'
-        : "item.toString().split('.')[1]";
+    final isIndex = enumProp.serializationType == SerializationType.Index;
+    final value =
+        isIndex ? 'item.index' : "item.toString().split('.')[1].toLowerCase()";
     return '''${param.type}.values.firstWhere(
-        (item) => ${_generateMapLookup(enumValueMap, value)} == json['${param.displayName}'],
+        (item) => ${_generateMapLookup(enumValueMap, value)} == json['${param.displayName}']${!isIndex ? '.toLowerCase()' : ''},
         orElse: () => null)''';
   }
 
@@ -289,11 +290,10 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
                   .getField(displayName))
               .intValue
           : displayName;
+      final valField = enumValProps[fieldEntry.key]?.getField('value');
       final value =
-          ConstantReader(enumValProps[fieldEntry.key].getField('value'))
-                  .literalValue ??
-              key;
-      map[key] = value;
+          valField != null ? ConstantReader(valField).literalValue : null;
+      map[key] = value ?? key;
       return map;
     });
   }

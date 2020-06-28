@@ -1,11 +1,14 @@
 import 'package:simple_json_mapper/simple_json_mapper.dart';
 import 'package:simple_json_example/test.dart';
 
+enum ProductType { Shoe, Shirt, Bottom }
+
 @JsonObject()
 class Product {
-  const Product({this.name, this.expiry, this.sizes, this.tests});
+  const Product({this.name, this.type, this.expiry, this.sizes, this.tests});
   final String name;
+  final ProductType type;
   final DateTime expiry;
-  final List<int> sizes;
+  final List<double> sizes;
   final List<Test> tests;
 }

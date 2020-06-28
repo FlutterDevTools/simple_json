@@ -21,8 +21,9 @@ void main() {
   JsonMapper.registerConverter(SpecialDateTimeConverter());
   final product = Product(
     name: 'Test',
+    type: ProductType.Shoe,
     expiry: DateTime.now(),
-    sizes: [10, 20, 40],
+    sizes: [10, 8, 5.5],
     tests: [
       Test(name: 'hello'),
       Test(name: 'blah'),
