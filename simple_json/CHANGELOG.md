@@ -1,4 +1,7 @@
 ## 0.2.3 - 06/28/2020
+* Added external type serialization support.
+
+## 0.2.3 - 06/28/2020
 * Fix bug with `EnumValue` annotation.
 
 ## 0.2.2 - 06/24/2020

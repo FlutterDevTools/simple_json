@@ -10,10 +10,8 @@ class BaseAccount {
   // Converter directly applied to a field. Takes precedence over all converter configurations
   @SpecialDateTimeConverter(true)
   final DateTime closedDate;
-  
 }
 
-@JObj()
 class Account extends BaseAccount {
   const Account(
       {this.id,

@@ -45,11 +45,22 @@ class JsonMapperBuilder implements Builder {
           .toList());
     }
 
-    final mappers = classesInLibrary.map((c) => _generateMapper(c)).toList();
+    final annotatedClasses = classesInLibrary.toSet();
+    final aliases = annotatedClasses
+        .where((libClass) =>
+            libClass.unnamedConstructor.redirectedConstructor ==
+            libClass.supertype.element.unnamedConstructor)
+        .toList();
+    aliases.forEach((alias) {
+      annotatedClasses.remove(alias);
+      annotatedClasses.add(alias.supertype.element);
+    });
+
+    final mappers = annotatedClasses.map((c) => _generateMapper(c)).toList();
     final unmappedTypes = processedTypes
         .where((t) => t.element is ClassElement)
         .toSet()
-        .difference(classesInLibrary
+        .difference(annotatedClasses
             .map((optedClasses) => optedClasses.thisType)
             .toSet());
     print(
@@ -59,9 +70,12 @@ class JsonMapperBuilder implements Builder {
         unmappedTypes.map((t) => t.element as ClassElement).toList();
     mappers.addAll(unmappedElements.map((c) => _generateMapper(c)));
 
-    final classes = [...classesInLibrary, ...unmappedElements];
-    final imports = _generateHeader([...classes, ...usedElements]);
-    final registrations = _generateInit(classes);
+    final classMap = <ClassElement, bool>{};
+    [...annotatedClasses, ...unmappedElements]
+        .forEach((rClass) => classMap[rClass] = false);
+    aliases.forEach((alias) => classMap[alias] = true);
+    final imports = _generateHeader([...classMap.keys, ...usedElements]);
+    final registrations = _generateInit(classMap);
 
     lines.add(imports);
     lines.addAll(mappers);
@@ -334,16 +348,17 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
     return (param.field.type.element as ClassElement).isEnum;
   }
 
-  String _generateInit(List<ClassElement> elements) {
+  String _generateInit(Map<ClassElement, bool> elements) {
     return '''
 void init() {
-  ${elements.map(_generateRegistration).join('\n  ')} 
+  ${elements.entries.map(_generateRegistration).join('\n  ')} 
 }
     ''';
   }
 
-  String _generateRegistration(ClassElement element) {
-    return '''JsonMapper.register(_${element.displayName.toLowerCase()}Mapper);''';
+  String _generateRegistration(MapEntry<ClassElement, bool> entry) {
+    final element = entry.value ? entry.key.supertype.element : entry.key;
+    return '''JsonMapper.register${entry.value ? '<${entry.key.displayName}>' : ''}(_${element.displayName.toLowerCase()}Mapper);''';
   }
 
   String _generateHeader(List<Element> elements) {
