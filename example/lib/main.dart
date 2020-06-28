@@ -25,8 +25,8 @@ void main() {
     expiry: DateTime.now(),
     sizes: [10, 8, 5.5],
     tests: [
-      Test(name: 'hello'),
-      Test(name: 'blah'),
+      Test(name: 'hello', nestedTest: NestedTest(ze: 'ok')),
+      Test(name: 'blah', nestedTest: NestedTest(ze: 'he')),
     ],
   );
   final account = Account(
@@ -74,26 +74,31 @@ void main() {
   // OUTPUT:
   /*
   Serialized Account:
-  {"id":"b352196c-2192-4ec8-97fe-94d9ab7f9d78","type":10,"name":"Test","number":"xxx12414","amount":100.5,"tranCount":10,
-  "isActive":1,"product":{"name":"Test","expiry":"2020-6-24","sizes":[10,20,40],"tests":[{"name":"hello"},{"name":"blah"}]},
-  "closedDate":"2020-05-16","openingDate":"2010-4-2"}
+  {"id":"B4FECC31-2429-4631-BA57-DADA21C3D6E0","type":10,"name":"TEST","number":"XXX12414","amount":100.5,
+  "tranCount":10,"isActive":true,"product":{"name":"TEST","type":"SHOE","expiry":"2020-6-28","sizes":[10.0,8.0,5.5],
+  "tests":[{"name":"HELLO","nestedTest":{"ze":"OK"}},{"name":"BLAH","nestedTest":{"ze":"HE"}}]},"closedDate":
+  "2020-05-16","openingDate":"2010-4-2"}
 
   Re-serialized Account:
-  {"id":"b352196c-2192-4ec8-97fe-94d9ab7f9d78","type":10,"name":"Test","number":"xxx12414","amount":100.5,"tranCount":10,
-  "isActive":1,"product":{"name":"Test","expiry":"2020-6-24","sizes":[10,20,40],"tests":[{"name":"hello"},{"name":"blah"}]},
-  "closedDate":"2020-05-16","openingDate":"2010-4-2"}
+  {"id":"B4FECC31-2429-4631-BA57-DADA21C3D6E0","type":10,"name":"TEST","number":"XXX12414","amount":100.5,
+  "tranCount":10,"isActive":true,"product":{"name":"TEST","type":"SHOE","expiry":"2020-6-28","sizes":[10.0,8.0,5.5],
+  "tests":[{"name":"HELLO","nestedTest":{"ze":"OK"}},{"name":"BLAH","nestedTest":{"ze":"HE"}}]},"closedDate":
+  "2020-05-16","openingDate":"2010-4-2"}
 
 
   Serialized with Custom Mapper and converters:
-  {"id":"B352196C-2192-4EC8-97FE-94D9AB7F9D78","type":10,"name":"TEST","number":"XXX12414","amount":100.5,"tranCount":10,
-  "isActive":true,"product":{"name":"TEST","expiry":"2020-06-24T01:56:31.942252","sizes":[10,20,40],"tests":[{"name":"HELLO"},
-  {"name":"BLAH"}]},"closedDate":"2020-05-16","openingDate":"2010-04-02T00:00:00.000"}
+  {"id":"b4fecc31-2429-4631-ba57-dada21c3d6e0","type":10,"name":"Test","number":"xxx12414","amount":100.5,
+  "tranCount":10,"isActive":1,"product":{"name":"Test","type":"Shoe","expiry":"2020-06-28T02:15:21.412538",
+  "sizes":[10.0,8.0,5.5],"tests":[{"name":"hello","nestedTest":{"ze":"ok"}},{"name":"blah","nestedTest":{"ze":"he"}}]},
+  "closedDate":"2020-05-16","openingDate":"2010-04-02T00:00:00.000"}
 
 
   Serialized Product:
-  {"name":"Test","expiry":"2020-6-24","sizes":[10,20,40],"tests":[{"name":"hello"},{"name":"blah"}]}
+  {"name":"TEST","type":"SHOE","expiry":"2020-6-28","sizes":[10.0,8.0,5.5],"tests":[{"name":"HELLO","nestedTest":
+  {"ze":"OK"}},{"name":"BLAH","nestedTest":{"ze":"HE"}}]}
 
   Re-serialize Product:
-  {"name":"Test","expiry":"2020-6-24","sizes":[10,20,40],"tests":[{"name":"hello"},{"name":"blah"}]}
+  {"name":"TEST","type":"SHOE","expiry":"2020-6-28","sizes":[10.0,8.0,5.5],"tests":[{"name":"HELLO","nestedTest":
+  {"ze":"OK"}},{"name":"BLAH","nestedTest":{"ze":"HE"}}]}
   */
 }

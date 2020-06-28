@@ -5,7 +5,6 @@ import 'package:simple_json_mapper/simple_json_mapper.dart';
 import 'package:simple_json_example/product.dart';
 import 'package:simple_json_example/account.dart';
 import 'package:simple_json_example/test.dart';
-import 'package:simple_json_example/external_account_alias.dart';
 import 'package:simple_json_example/converters/special_datetime.dart';
 
 final _productMapper = JsonObjectMapper(
@@ -61,9 +60,21 @@ final _accountMapper = JsonObjectMapper(
 final _testMapper = JsonObjectMapper(
   (CustomJsonMapper mapper, Map<String, dynamic> json) => Test(
     name: mapper.applyFromJsonConverter(json['name']),
+    nestedTest: mapper.deserialize<NestedTest>(json['nestedTest'] as Map<String, dynamic>),
   ),
   (CustomJsonMapper mapper, Test instance) => <String, dynamic>{
     'name': mapper.applyFromInstanceConverter(instance.name),
+    'nestedTest': mapper.serializeToMap(instance.nestedTest),
+  },
+);
+
+
+final _nestedtestMapper = JsonObjectMapper(
+  (CustomJsonMapper mapper, Map<String, dynamic> json) => NestedTest(
+    ze: mapper.applyFromJsonConverter(json['ze']),
+  ),
+  (CustomJsonMapper mapper, NestedTest instance) => <String, dynamic>{
+    'ze': mapper.applyFromInstanceConverter(instance.ze),
   },
 );
 
@@ -71,6 +82,6 @@ void init() {
   JsonMapper.register(_productMapper);
   JsonMapper.register(_accountMapper);
   JsonMapper.register(_testMapper);
-  JsonMapper.register<ExternalAccountAlias>(_accountMapper); 
+  JsonMapper.register(_nestedtestMapper); 
 }
     

@@ -1,3 +1,9 @@
+## 0.2.6 - 06/28/2020
+* Fix bug with nested implicitly opted types
+
+## 0.2.5 - 06/28/2020
+* Ignore external alias type when revealing other supertype.
+
 ## 0.2.4 - 06/28/2020
 * Added external type serialization support.
 

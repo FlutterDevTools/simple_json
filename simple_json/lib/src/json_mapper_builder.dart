@@ -15,7 +15,7 @@ class JsonMapperBuilder implements Builder {
 
   static final _allFilesInLib = new Glob('lib/**');
 
-  final processedTypes = Set<DartType>();
+  final implicitlyOptedTypes = Set<DartType>();
   final usedElements = Set<Element>();
 
   @override
@@ -57,25 +57,26 @@ class JsonMapperBuilder implements Builder {
     });
 
     final mappers = annotatedClasses.map((c) => _generateMapper(c)).toList();
-    final unmappedTypes = processedTypes
-        .where((t) => t.element is ClassElement)
-        .toSet()
-        .difference(annotatedClasses
-            .map((optedClasses) => optedClasses.thisType)
-            .toSet());
+
+    final allImplicitlyOptedClasses = Set<ClassElement>();
+    while (true) {
+      final implicitlyOptedClassTypes = implicitlyOptedTypes
+          .where((t) => t.element is ClassElement)
+          .map((t) => t.element as ClassElement)
+          .toSet()
+          .difference(annotatedClasses.toSet());
+      if (implicitlyOptedClassTypes.isEmpty) break;
+      allImplicitlyOptedClasses.addAll(implicitlyOptedClassTypes);
+      implicitlyOptedTypes.clear();
+      mappers.addAll(implicitlyOptedClassTypes.map((c) => _generateMapper(c)));
+    }
+
     print(
-        'WARNING: Generated mappings for the following unannotated types: ${unmappedTypes.map((t) => t.toString()).join(', ')}');
+        'WARNING: Generated mappings for the following unannotated types: ${allImplicitlyOptedClasses.map((t) => t.toString()).join(', ')}');
 
-    final unmappedElements =
-        unmappedTypes.map((t) => t.element as ClassElement).toList();
-    mappers.addAll(unmappedElements.map((c) => _generateMapper(c)));
-
-    final classMap = <ClassElement, bool>{};
-    [...annotatedClasses, ...unmappedElements]
-        .forEach((rClass) => classMap[rClass] = false);
-    aliases.forEach((alias) => classMap[alias] = true);
-    final imports = _generateHeader([...classMap.keys, ...usedElements]);
-    final registrations = _generateInit(classMap);
+    final classes = [...annotatedClasses, ...allImplicitlyOptedClasses];
+    final imports = _generateHeader([...classes, ...usedElements]);
+    final registrations = _generateInit(classes);
 
     lines.add(imports);
     lines.addAll(mappers);
@@ -119,7 +120,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
       final typeArgs = (param.type as InterfaceType).typeArguments;
       final firstTypeArg = typeArgs.isNotEmpty ? typeArgs.first : null;
       if (!isPrimitiveType(firstTypeArg)) {
-        processedTypes.add(firstTypeArg);
+        implicitlyOptedTypes.add(firstTypeArg);
         val =
             '''(${valFn('List')}).cast<Map<String, dynamic>>().map((item) => ${_generateDeserialize('item', firstTypeArg)}).toList()''';
       } else {
@@ -134,7 +135,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
     } else if (!isPrimitiveType(param.type) &&
         !isSkippedType(param.type) &&
         val == null) {
-      processedTypes.add(param.type);
+      implicitlyOptedTypes.add(param.type);
       val = _generateDeserialize(valFn('Map<String, dynamic>'), param.type);
     }
     return '''$name: ${val ?? valFn()}${prop.defaultValue != null ? ' ?? ${prop.defaultValue.toString()}' : ''},''';
@@ -166,7 +167,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
       final typeArgs = (param.type as InterfaceType).typeArguments;
       final firstTypeArg = typeArgs.isNotEmpty ? typeArgs.first : null;
       if (!isPrimitiveType(firstTypeArg)) {
-        processedTypes.add(firstTypeArg);
+        implicitlyOptedTypes.add(firstTypeArg);
         val =
             '''${valFn()}.map((item) => ${_generateSerialize('item', firstTypeArg)}).toList()''';
       }
@@ -179,7 +180,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
     } else if (!isPrimitiveType(param.type) &&
         !isSkippedType(param.type) &&
         val == null) {
-      processedTypes.add(param.type);
+      implicitlyOptedTypes.add(param.type);
       val = _generateSerialize(valFn(), param.type);
     }
     if (val == null) useTransform = true;
@@ -348,17 +349,16 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
     return (param.field.type.element as ClassElement).isEnum;
   }
 
-  String _generateInit(Map<ClassElement, bool> elements) {
+  String _generateInit(List<ClassElement> elements) {
     return '''
 void init() {
-  ${elements.entries.map(_generateRegistration).join('\n  ')} 
+  ${elements.map(_generateRegistration).join('\n  ')} 
 }
     ''';
   }
 
-  String _generateRegistration(MapEntry<ClassElement, bool> entry) {
-    final element = entry.value ? entry.key.supertype.element : entry.key;
-    return '''JsonMapper.register${entry.value ? '<${entry.key.displayName}>' : ''}(_${element.displayName.toLowerCase()}Mapper);''';
+  String _generateRegistration(ClassElement element) {
+    return '''JsonMapper.register(_${element.displayName.toLowerCase()}Mapper);''';
   }
 
   String _generateHeader(List<Element> elements) {
