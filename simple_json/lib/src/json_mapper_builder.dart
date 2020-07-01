@@ -36,21 +36,24 @@ class JsonMapperBuilder implements Builder {
     final lines = <String>[];
     final classesInLibrary = <ClassElement>[];
     await for (final input in buildStep.findAssets(_allFilesInLib)) {
-      if (!await buildStep.resolver.isLibrary(input)) return;
+      if (!await buildStep.resolver.isLibrary(input)) continue;
       final library = await buildStep.resolver.libraryFor(input);
       classesInLibrary.addAll(LibraryReader(library)
           .annotatedWith(TypeChecker.fromRuntime(JsonObject))
           .where((match) => match.element is ClassElement)
           .map((match) => match.element as ClassElement)
+          .where((match) => match.unnamedConstructor != null && !match.isEnum)
           .toList());
     }
 
     final annotatedClasses = classesInLibrary.toSet();
-    final aliases = annotatedClasses
-        .where((libClass) =>
-            libClass.unnamedConstructor.redirectedConstructor ==
-            libClass.supertype.element.unnamedConstructor)
-        .toList();
+    final aliases = annotatedClasses.where((libClass) {
+      final redirectedCtor = libClass.unnamedConstructor?.redirectedConstructor;
+      final superTypeCtor = libClass.supertype?.element?.unnamedConstructor;
+      return redirectedCtor != null &&
+          superTypeCtor != null &&
+          redirectedCtor == superTypeCtor;
+    }).toList();
     aliases.forEach((alias) {
       annotatedClasses.remove(alias);
       annotatedClasses.add(alias.supertype.element);

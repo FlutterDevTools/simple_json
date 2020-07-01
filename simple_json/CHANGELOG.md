@@ -1,3 +1,9 @@
+## 0.3.2 - 07/01/2020
+* Fix bug with missing `unnamedConstructor` for types.
+
+## 0.3.1 - 07/01/2020
+* Fix bug with non-dart library file causing no output.
+
 ## 0.3.0 - 07/01/2020
 * Fix generator failure when a non-dart library file is found.
 * Use explicit types for generated serialization code.
