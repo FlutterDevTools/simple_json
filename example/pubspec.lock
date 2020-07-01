@@ -371,7 +371,7 @@ packages:
       path: "..\\simple_json"
       relative: true
     source: path
-    version: "0.2.6"
+    version: "0.3.3"
   simple_json_mapper:
     dependency: "direct main"
     description:

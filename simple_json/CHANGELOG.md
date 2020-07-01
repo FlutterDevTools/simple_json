@@ -1,3 +1,9 @@
+## 0.3.4 - 07/01/2020
+* Support `Map` with primitive type arguments.
+
+## 0.3.3 - 07/01/2020
+* Fix another bug with missing `unnamedConstructor` for types.
+
 ## 0.3.2 - 07/01/2020
 * Fix bug with missing `unnamedConstructor` for types.
 

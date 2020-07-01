@@ -42,7 +42,6 @@ class JsonMapperBuilder implements Builder {
           .annotatedWith(TypeChecker.fromRuntime(JsonObject))
           .where((match) => match.element is ClassElement)
           .map((match) => match.element as ClassElement)
-          .where((match) => match.unnamedConstructor != null && !match.isEnum)
           .toList());
     }
 
@@ -64,8 +63,8 @@ class JsonMapperBuilder implements Builder {
     final allImplicitlyOptedClasses = Set<ClassElement>();
     while (true) {
       final implicitlyOptedClassTypes = implicitlyOptedTypes
-          .where((t) => t.element is ClassElement)
-          .map((t) => t.element as ClassElement)
+          .where((match) => match.element is ClassElement)
+          .map((match) => match.element as ClassElement)
           .toSet()
           .difference(annotatedClasses.toSet());
       if (implicitlyOptedClassTypes.isEmpty) break;
@@ -89,6 +88,10 @@ class JsonMapperBuilder implements Builder {
   }
 
   String _generateMapper(ClassElement element) {
+    if (element.unnamedConstructor == null ||
+        element.isEnum ||
+        element.isAbstract) return '';
+
     final elementName = element.displayName;
     final parameters = element.unnamedConstructor.parameters;
     return '''
@@ -130,6 +133,17 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
         val =
             '''(${valFn('List')}).cast<${firstTypeArg.toString()}>().map((item) => ${converterWrapper('item', firstTypeArg.toString())}).toList()''';
       }
+    } else if (param.type.isDartCoreMap) {
+      // TODO(D10100111001): Handle non primitive types
+      final typeArgs = (param.type as InterfaceType).typeArguments;
+      final firstTypeArg = typeArgs.isNotEmpty ? typeArgs.first : null;
+      final secondTypeArg = typeArgs.isNotEmpty ? typeArgs[1] : null;
+      if (!isPrimitiveType(firstTypeArg))
+        implicitlyOptedTypes.add(firstTypeArg);
+      if (!isPrimitiveType(secondTypeArg))
+        implicitlyOptedTypes.add(secondTypeArg);
+      val =
+          '(${valFn('Map<String, dynamic>')}).cast<${firstTypeArg.toString()}, ${secondTypeArg.toString()}>()';
     } else if (isParamFieldFormal(param) && isParamEnum(param)) {
       final enumProp = getEnumProp(param);
       final enumValueMap = cleanMap(getEnumValueMap(param, enumProp));
@@ -174,6 +188,15 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
         val =
             '''${valFn()}.map((item) => ${_generateSerialize('item', firstTypeArg)}).toList()''';
       }
+    } else if (param.type.isDartCoreMap) {
+      // TODO(D10100111001): Handle non primitive types
+      final typeArgs = (param.type as InterfaceType).typeArguments;
+      final firstTypeArg = typeArgs.isNotEmpty ? typeArgs.first : null;
+      final secondTypeArg = typeArgs.isNotEmpty ? typeArgs[1] : null;
+      if (!isPrimitiveType(firstTypeArg))
+        implicitlyOptedTypes.add(firstTypeArg);
+      if (!isPrimitiveType(secondTypeArg))
+        implicitlyOptedTypes.add(secondTypeArg);
     } else if (isParamFieldFormal(param) && isParamEnum(param)) {
       final enumProp = getEnumProp(param);
       final enumValueMap = cleanMap(getEnumValueMap(param, enumProp));

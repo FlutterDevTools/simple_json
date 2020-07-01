@@ -28,6 +28,7 @@ void main() {
       Test(name: 'hello', nestedTest: NestedTest(ze: 'ok')),
       Test(name: 'blah', nestedTest: NestedTest(ze: 'he')),
     ],
+    attributes: {'top': 'kek'},
   );
   final account = Account(
     id: Uuid().v4(),

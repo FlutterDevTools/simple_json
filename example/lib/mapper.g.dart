@@ -16,6 +16,7 @@ final _productMapper = JsonObjectMapper(
     expiry: mapper.applyFromJsonConverter(json['expiry']),
     sizes: (json['sizes'] as List).cast<double>().map((item) => mapper.applyFromJsonConverter<double>(item)).toList(),
     tests: (json['tests'] as List).cast<Map<String, dynamic>>().map((item) => mapper.deserialize<Test>(item)).toList(),
+    attributes: (json['attributes'] as Map<String, dynamic>).cast<String, String>(),
   ),
   (CustomJsonMapper mapper, Product instance) => <String, dynamic>{
     'name': mapper.applyFromInstanceConverter(instance.name),
@@ -23,6 +24,7 @@ final _productMapper = JsonObjectMapper(
     'expiry': mapper.applyFromInstanceConverter(instance.expiry),
     'sizes': mapper.applyFromInstanceConverter(instance.sizes),
     'tests': instance.tests.map((item) => mapper.serializeToMap<Test>(item)).toList(),
+    'attributes': mapper.applyFromInstanceConverter(instance.attributes),
   },
 );
 
