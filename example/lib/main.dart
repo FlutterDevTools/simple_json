@@ -65,11 +65,11 @@ void main() {
   print(customMapper.serialize(account));
 
   print('\n\nSerialized Product:');
-  final productSerialized = JsonMapper.serialize(product);
+  final productSerialized = JsonMapper.serialize([product]);
   print(productSerialized);
   print('\nRe-serialize Product:');
-  print(
-      JsonMapper.serialize(JsonMapper.deserialize<Product>(productSerialized)));
+  print(JsonMapper.serialize(
+      JsonMapper.deserializeList<Product>(productSerialized)));
 
   // OUTPUT:
   /*

@@ -1,3 +1,7 @@
+## 0.3.0 - 07/01/2020
+* Fix generator failure when a non-dart library file is found.
+* Use explicit types for generated serialization code.
+
 ## 0.2.6 - 06/28/2020
 * Fix bug with nested implicitly opted types
 

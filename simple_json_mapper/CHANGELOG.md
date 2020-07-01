@@ -1,3 +1,7 @@
+## 0.3.0 - 07/01/2020
+* Support serializing and deserializing of lists. Deserializing requires the actual item type so a new `deserializeList<T>` method was added.
+* Cleanup of API and internal usages. 
+
 ## 0.2.2 - 06/24/2020
 * Keep version in sync with `simple_json`. 
 

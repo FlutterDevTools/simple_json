@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:simple_json_mapper/simple_json_mapper.dart';
+
 import 'converters/datetime.dart';
 import 'json_converter.dart';
 
@@ -14,10 +16,9 @@ class JsonObjectMapper<T> {
 
 class JsonMapper {
   static CustomJsonMapper _instance = CustomJsonMapper();
-  static bool isRegistered<T>() => _instance.isRegistered<T>();
-
-  static bool isRegisteredByType(String type) =>
-      _instance.isRegisteredByType(type);
+  static bool isMapperRegistered<T>() => _instance.isMapperRegistered<T>();
+  static bool isConverterRegistered<T>() =>
+      _instance.isConverterRegistered<T>();
 
   static void register<T>(JsonObjectMapper<T> mapper) =>
       _instance.register(mapper);
@@ -28,15 +29,14 @@ class JsonMapper {
       _instance.serializeToMap(item);
 
   static T deserialize<T>(dynamic jsonVal) => _instance.deserialize(jsonVal);
+  static List<T> deserializeList<T>(dynamic jsonVal) =>
+      _instance.deserializeList(jsonVal);
+
+  static T deserializeFromMap<T>(dynamic jsonVal) =>
+      _instance.deserializeFromMap(jsonVal);
 
   static void registerConverter<T>(JsonConverter<dynamic, T> transformer) =>
       _instance.registerConverter(transformer);
-
-  static dynamic applyFromInstanceConverter<T>(T value) =>
-      _instance.applyFromInstanceConverter(value);
-
-  static T applyFromJsonConverter<T>(dynamic value) =>
-      _instance.applyFromJsonConverter(value);
 }
 
 class CustomJsonMapper {
@@ -55,12 +55,20 @@ class CustomJsonMapper {
     (DateTime).toString(): const DefaultISO8601DateConverter(),
   };
 
-  bool isRegistered<T>() {
-    return isRegisteredByType(T.toString());
+  bool isMapperRegistered<T>() {
+    return _isMapperRegisteredByType(T.toString());
   }
 
-  bool isRegisteredByType(String type) {
+  bool _isMapperRegisteredByType(String type) {
     return _mapper.containsKey(type);
+  }
+
+  bool isConverterRegistered<T>() {
+    return _isConverterRegisteredByType(T.toString());
+  }
+
+  bool _isConverterRegisteredByType(String type) {
+    return _converters.containsKey(type);
   }
 
   void register<T>(JsonObjectMapper<T> mapper) {
@@ -68,20 +76,91 @@ class CustomJsonMapper {
   }
 
   String serialize<T>(T item) {
-    return json.encode(serializeToMap(item));
+    final typeName = _getTypeName<T>();
+    return json.encode(_isList<T>()
+        ? (item as List)
+            .map((i) => _serializeToMapWithType(typeName, i))
+            .toList()
+        : serializeToMap(item));
   }
 
   Map<String, dynamic> serializeToMap<T>(T item) {
-    return item != null
-        ? (_mapper[T.toString()] as JsonObjectMapper<T>).toJsonMap(this, item)
-        : null;
+    return _serializeToMapWithType(T.toString(), item);
+  }
+
+  Map<String, dynamic> _serializeToMapWithType(String typeName, dynamic item) {
+    final typeMap = _getTypeMapWithType(typeName) as dynamic;
+    return item != null ? typeMap?.toJsonMap(this, item) : null;
   }
 
   T deserialize<T>(dynamic jsonVal) {
-    return jsonVal != null
-        ? (_mapper[T.toString()] as JsonObjectMapper<T>).fromJsonMap(
-            this, jsonVal is String ? json.decode(jsonVal) : jsonVal)
-        : null;
+    final decodedJson = jsonVal is String ? json.decode(jsonVal) : jsonVal;
+    final isList = _isList<T>();
+    if (isList) {
+      throw 'Use [deserializeList<T>] method to deserlialize list of items.';
+    }
+    assert(!isList || (isList && decodedJson is List));
+    return isList
+        ? (decodedJson as dynamic)
+            .map((json) => _deserializeFromMapWithType(T.toString(), json))
+            .toList() as T
+        : deserializeFromMap(decodedJson);
+  }
+
+  List<T> deserializeList<T>(dynamic jsonVal) {
+    final decodedJson = jsonVal is String ? json.decode(jsonVal) : jsonVal;
+    return (decodedJson as List)
+        .map((item) => deserialize<T>(item))
+        .cast<T>()
+        .toList();
+  }
+
+  T deserializeFromMap<T>(dynamic jsonVal) {
+    return _deserializeFromMapWithType(T.toString(), jsonVal) as T;
+  }
+
+  dynamic _deserializeFromMapWithType(String typeName, dynamic jsonVal) {
+    final typeMap = _getTypeMapWithType(typeName) as dynamic;
+    return jsonVal != null ? typeMap?.fromJsonMap(this, jsonVal) : null;
+  }
+
+  static const _ListNameTypeMarker = 'List<';
+
+  bool _isList<T>() {
+    return _isListWithType(T.toString());
+  }
+
+  bool _isListWithType(String typeName) {
+    return typeName.startsWith(_ListNameTypeMarker);
+  }
+
+  JsonObjectMapper<dynamic> _getTypeMap<T>() {
+    var typeName = T.toString();
+    final isList = _isList<T>();
+    return isList
+        ? _getTypeMapWithType(typeName)
+        : _getTypeMapWithType(typeName) as JsonObjectMapper<T>;
+  }
+
+  JsonObjectMapper<dynamic> _getTypeMapWithType(String originalTypeName) {
+    final typeName = _getTypeNameWithName(originalTypeName);
+    final typeMap = _mapper[typeName];
+    assert(typeMap != null, 'The type ${typeName} is not registered.');
+    return typeMap;
+  }
+
+  String _getTypeName<T>() {
+    var typeName = T.toString();
+    return _getTypeNameWithName(typeName);
+  }
+
+  String _getTypeNameWithName(String typeName) {
+    final isList = _isListWithType(typeName);
+    if (isList) {
+      typeName =
+          typeName.substring(_ListNameTypeMarker.length, typeName.length - 1);
+    }
+    return typeName;
   }
 
   void registerConverter<T>(JsonConverter<dynamic, T> transformer) {

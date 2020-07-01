@@ -1,4 +1,3 @@
-import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
@@ -37,6 +36,7 @@ class JsonMapperBuilder implements Builder {
     final lines = <String>[];
     final classesInLibrary = <ClassElement>[];
     await for (final input in buildStep.findAssets(_allFilesInLib)) {
+      if (!await buildStep.resolver.isLibrary(input)) return;
       final library = await buildStep.resolver.libraryFor(input);
       classesInLibrary.addAll(LibraryReader(library)
           .annotatedWith(TypeChecker.fromRuntime(JsonObject))
@@ -321,7 +321,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
   }
 
   String _generateSerialize(String val, DartType type) {
-    return 'mapper.serializeToMap($val)';
+    return 'mapper.serializeToMap<${type}>($val)';
   }
 
   String _generateDeserialize(String val, DartType type) {

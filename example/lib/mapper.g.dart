@@ -22,7 +22,7 @@ final _productMapper = JsonObjectMapper(
     'type': mapper.applyFromInstanceConverter(instance.type.toString().split('.')[1]),
     'expiry': mapper.applyFromInstanceConverter(instance.expiry),
     'sizes': mapper.applyFromInstanceConverter(instance.sizes),
-    'tests': instance.tests.map((item) => mapper.serializeToMap(item)).toList(),
+    'tests': instance.tests.map((item) => mapper.serializeToMap<Test>(item)).toList(),
   },
 );
 
@@ -50,7 +50,7 @@ final _accountMapper = JsonObjectMapper(
     'amount': mapper.applyFromInstanceConverter(instance.amount),
     'tranCount': mapper.applyFromInstanceConverter(instance.transactionCount ?? 11),
     'isActive': mapper.applyFromInstanceConverter(instance.isActive),
-    'product': mapper.serializeToMap(instance.product),
+    'product': mapper.serializeToMap<Product>(instance.product),
     'closedDate': mapper.applyFromInstanceConverter(instance.closedDate, SpecialDateTimeConverter(true)),
     'openingDate': mapper.applyFromInstanceConverter(instance.openDate),
   },
@@ -64,7 +64,7 @@ final _testMapper = JsonObjectMapper(
   ),
   (CustomJsonMapper mapper, Test instance) => <String, dynamic>{
     'name': mapper.applyFromInstanceConverter(instance.name),
-    'nestedTest': mapper.serializeToMap(instance.nestedTest),
+    'nestedTest': mapper.serializeToMap<NestedTest>(instance.nestedTest),
   },
 );
 
