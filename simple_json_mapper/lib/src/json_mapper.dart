@@ -23,14 +23,15 @@ class JsonMapper {
   static void register<T>(JsonObjectMapper<T> mapper) =>
       _instance.register(mapper);
 
+  static void registerListCast<T>(ListCastFunction<T> castFn) =>
+      _instance.registerListCast(castFn);
+
   static String serialize<T>(T item) => _instance.serialize(item);
 
   static Map<String, dynamic> serializeToMap<T>(T item) =>
       _instance.serializeToMap(item);
 
   static T deserialize<T>(dynamic jsonVal) => _instance.deserialize(jsonVal);
-  static List<T> deserializeList<T>(dynamic jsonVal) =>
-      _instance.deserializeList(jsonVal);
 
   static T deserializeFromMap<T>(dynamic jsonVal) =>
       _instance.deserializeFromMap(jsonVal);
@@ -38,6 +39,8 @@ class JsonMapper {
   static void registerConverter<T>(JsonConverter<dynamic, T> transformer) =>
       _instance.registerConverter(transformer);
 }
+
+typedef ListCastFunction<T> = List<T> Function(List<dynamic> list);
 
 class CustomJsonMapper {
   CustomJsonMapper({List<JsonConverter<dynamic, dynamic>> converters}) {
@@ -50,6 +53,7 @@ class CustomJsonMapper {
   }
 
   static final _mapper = <String, JsonObjectMapper<dynamic>>{};
+  static final _listCasts = <String, ListCastFunction>{};
 
   final _converters = <String, JsonConverter<dynamic, dynamic>>{
     (DateTime).toString(): const DefaultISO8601DateConverter(),
@@ -75,6 +79,14 @@ class CustomJsonMapper {
     _mapper[T.toString()] = mapper;
   }
 
+  void registerListCast<T>(ListCastFunction<T> castFn) {
+    _listCasts[_typeOf<List<T>>()] = castFn;
+  }
+
+  String _typeOf<T>() {
+    return T.toString();
+  }
+
   String serialize<T>(T item) {
     final typeName = _getTypeName<T>();
     return json.encode(_isList<T>()
@@ -96,23 +108,17 @@ class CustomJsonMapper {
   T deserialize<T>(dynamic jsonVal) {
     final decodedJson = jsonVal is String ? json.decode(jsonVal) : jsonVal;
     final isList = _isList<T>();
-    if (isList) {
-      throw 'Use [deserializeList<T>] method to deserlialize list of items.';
-    }
     assert(!isList || (isList && decodedJson is List));
-    return isList
-        ? (decodedJson as dynamic)
-            .map((json) => _deserializeFromMapWithType(T.toString(), json))
-            .toList() as T
-        : deserializeFromMap(decodedJson);
-  }
+    if (isList) {
+      final listCastFn = _listCasts[T.toString()];
+      assert(listCastFn != null);
+      final deserializedList = (decodedJson as List)
+          .map((json) => _deserializeFromMapWithType(T.toString(), json))
+          .toList();
+      return listCastFn(deserializedList) as T;
+    }
 
-  List<T> deserializeList<T>(dynamic jsonVal) {
-    final decodedJson = jsonVal is String ? json.decode(jsonVal) : jsonVal;
-    return (decodedJson as List)
-        .map((item) => deserialize<T>(item))
-        .cast<T>()
-        .toList();
+    return deserializeFromMap(decodedJson);
   }
 
   T deserializeFromMap<T>(dynamic jsonVal) {

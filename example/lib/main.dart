@@ -70,7 +70,7 @@ void main() {
   print(productSerialized);
   print('\nRe-serialize Product:');
   print(JsonMapper.serialize(
-      JsonMapper.deserializeList<Product>(productSerialized)));
+      JsonMapper.deserialize<List<Product>>(productSerialized)));
 
   // OUTPUT:
   /*

@@ -59,6 +59,7 @@ final _accountMapper = JsonObjectMapper(
 );
 
 
+
 final _testMapper = JsonObjectMapper(
   (CustomJsonMapper mapper, Map<String, dynamic> json) => Test(
     name: mapper.applyFromJsonConverter(json['name']),
@@ -69,6 +70,7 @@ final _testMapper = JsonObjectMapper(
     'nestedTest': mapper.serializeToMap<NestedTest>(instance.nestedTest),
   },
 );
+
 
 
 final _nestedtestMapper = JsonObjectMapper(
@@ -85,5 +87,12 @@ void init() {
   JsonMapper.register(_accountMapper);
   JsonMapper.register(_testMapper);
   JsonMapper.register(_nestedtestMapper); 
+
+  JsonMapper.registerListCast((value) => value.cast<Product>().toList());
+  JsonMapper.registerListCast((value) => value.cast<Account>().toList());
+  JsonMapper.registerListCast((value) => value.cast<ProductType>().toList());
+  JsonMapper.registerListCast((value) => value.cast<Test>().toList());
+  JsonMapper.registerListCast((value) => value.cast<AccountType>().toList());
+  JsonMapper.registerListCast((value) => value.cast<NestedTest>().toList());
 }
     

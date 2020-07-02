@@ -2,7 +2,7 @@ import 'package:simple_json_example/converters/special_datetime.dart';
 import 'package:simple_json_mapper/simple_json_mapper.dart';
 import 'package:simple_json_example/product.dart';
 
-class BaseAccount {
+abstract class BaseAccount {
   const BaseAccount({this.openDate, this.closedDate});
   @JProp(name: 'openingDate')
   final DateTime openDate;

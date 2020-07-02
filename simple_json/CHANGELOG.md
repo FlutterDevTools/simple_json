@@ -1,3 +1,9 @@
+## 0.4.0 - 07/01/2020
+* Support list casting for list de-serialization.
+
+## 0.3.5 - 07/01/2020
+* Fix bugs with abstract and enum class registrations and importing of implicitly opted enums.
+
 ## 0.3.4 - 07/01/2020
 * Support `Map` with primitive type arguments.
 

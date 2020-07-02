@@ -78,7 +78,12 @@ class JsonMapperBuilder implements Builder {
 
     final classes = [...annotatedClasses, ...allImplicitlyOptedClasses];
     final imports = _generateHeader([...classes, ...usedElements]);
-    final registrations = _generateInit(classes);
+    final registrations = _generateInit(
+        classes
+            .where((c) =>
+                c.unnamedConstructor != null && !c.isEnum && !c.isAbstract)
+            .toList(),
+        classes);
 
     lines.add(imports);
     lines.addAll(mappers);
@@ -145,6 +150,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
       val =
           '(${valFn('Map<String, dynamic>')}).cast<${firstTypeArg.toString()}, ${secondTypeArg.toString()}>()';
     } else if (isParamFieldFormal(param) && isParamEnum(param)) {
+      implicitlyOptedTypes.add(param.type);
       final enumProp = getEnumProp(param);
       final enumValueMap = cleanMap(getEnumValueMap(param, enumProp));
       val =
@@ -375,12 +381,19 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
     return (param.field.type.element as ClassElement).isEnum;
   }
 
-  String _generateInit(List<ClassElement> elements) {
+  String _generateInit(List<ClassElement> registrationElements,
+      List<ClassElement> listCastElements) {
     return '''
 void init() {
-  ${elements.map(_generateRegistration).join('\n  ')} 
+  ${registrationElements.map(_generateRegistration).join('\n  ')} 
+
+  ${listCastElements.map(_generateListCast).join('\n  ')}
 }
     ''';
+  }
+
+  String _generateListCast(ClassElement element) {
+    return '''JsonMapper.registerListCast((value) => value.cast<${element.displayName}>().toList());''';
   }
 
   String _generateRegistration(ClassElement element) {

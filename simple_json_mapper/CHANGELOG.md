@@ -1,3 +1,6 @@
+## 0.4.0 - 07/01/2020
+* Support serializing and deserializing of lists. `deserializeList<T>` method was removed. Use the normal `deserialize<T>` (where T is a type of `List<Type>`) method instead.
+
 ## 0.3.0 - 07/01/2020
 * Support serializing and deserializing of lists. Deserializing requires the actual item type so a new `deserializeList<T>` method was added.
 * Cleanup of API and internal usages. 
