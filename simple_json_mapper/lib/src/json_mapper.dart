@@ -26,7 +26,7 @@ class JsonMapper {
   static void registerListCast<T>(ListCastFunction<T> castFn) =>
       _instance.registerListCast(castFn);
 
-  static String serialize<T>(T item) => _instance.serialize(item);
+  static String serialize(Object item) => _instance.serialize(item);
 
   static Map<String, dynamic> serializeToMap<T>(T item) =>
       _instance.serializeToMap(item);
@@ -87,25 +87,30 @@ class CustomJsonMapper {
     return T.toString();
   }
 
-  String serialize<T>(T item) {
-    final typeName = _getTypeName<T>();
-    return json.encode(_isList<T>()
+  String serialize(Object item) {
+    if (item == null) return null;
+    final typeName = item.runtimeType.toString();
+    return json.encode(_isListWithType(typeName)
         ? (item as List)
             .map((i) => _serializeToMapWithType(typeName, i))
             .toList()
         : serializeToMap(item));
   }
 
-  Map<String, dynamic> serializeToMap<T>(T item) {
-    return _serializeToMapWithType(T.toString(), item);
+  Map<String, dynamic> serializeToMap(Object item) {
+    if (item == null) return null;
+    final typeName = item.runtimeType.toString();
+    return _serializeToMapWithType(typeName, item);
   }
 
-  Map<String, dynamic> _serializeToMapWithType(String typeName, dynamic item) {
+  Map<String, dynamic> _serializeToMapWithType(String typeName, Object item) {
+    if (item == null) return null;
     final typeMap = _getTypeMapWithType(typeName) as dynamic;
-    return item != null ? typeMap?.toJsonMap(this, item) : null;
+    return typeMap?.toJsonMap(this, item);
   }
 
   T deserialize<T>(dynamic jsonVal) {
+    if (jsonVal == null) return null;
     final decodedJson = jsonVal is String ? json.decode(jsonVal) : jsonVal;
     final isList = _isList<T>();
     assert(!isList || (isList && decodedJson is List));

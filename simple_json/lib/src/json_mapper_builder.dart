@@ -66,7 +66,8 @@ class JsonMapperBuilder implements Builder {
           .where((match) => match.element is ClassElement)
           .map((match) => match.element as ClassElement)
           .toSet()
-          .difference(annotatedClasses.toSet());
+          .difference(annotatedClasses.toSet())
+          .difference(allImplicitlyOptedClasses);
       if (implicitlyOptedClassTypes.isEmpty) break;
       allImplicitlyOptedClasses.addAll(implicitlyOptedClassTypes);
       implicitlyOptedTypes.clear();
@@ -122,8 +123,10 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
     final converterWrapper = (String val, [String type]) =>
         'mapper.applyFromJsonConverter${type != null ? '<$type>' : ''}($val${converterProp != null ? ', $converterProp' : ''})';
     final valFn = ([String asType]) {
-      final accStr =
-          asType == null ? converterWrapper(accessorStr) : accessorStr;
+      final accStr = asType == null
+          ? converterWrapper(
+              accessorStr, param.type.isDynamic ? 'dynamic' : null)
+          : accessorStr;
       return '''$accStr${asType != null ? ' as $asType' : ''}''';
     };
     var val;
@@ -133,10 +136,10 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
       if (!isPrimitiveType(firstTypeArg)) {
         implicitlyOptedTypes.add(firstTypeArg);
         val =
-            '''(${valFn('List')}).cast<Map<String, dynamic>>().map((item) => ${_generateDeserialize('item', firstTypeArg)}).toList()''';
+            '''(${valFn('List')})?.cast<Map<String, dynamic>>()?.map((item) => ${_generateDeserialize('item', firstTypeArg)})?.toList()''';
       } else {
         val =
-            '''(${valFn('List')}).cast<${firstTypeArg.toString()}>().map((item) => ${converterWrapper('item', firstTypeArg.toString())}).toList()''';
+            '''(${valFn('List')})?.cast<${firstTypeArg.toString()}>()?.map((item) => ${converterWrapper('item', firstTypeArg.toString())})?.toList()''';
       }
     } else if (param.type.isDartCoreMap) {
       // TODO(D10100111001): Handle non primitive types
@@ -148,7 +151,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
       if (!isPrimitiveType(secondTypeArg))
         implicitlyOptedTypes.add(secondTypeArg);
       val =
-          '(${valFn('Map<String, dynamic>')}).cast<${firstTypeArg.toString()}, ${secondTypeArg.toString()}>()';
+          '(${valFn('Map<String, dynamic>')})?.cast<${firstTypeArg.toString()}, ${secondTypeArg.toString()}>()';
     } else if (isParamFieldFormal(param) && isParamEnum(param)) {
       implicitlyOptedTypes.add(param.type);
       final enumProp = getEnumProp(param);
@@ -170,7 +173,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
     final value =
         isIndex ? 'item.index' : "item.toString().split('.')[1].toLowerCase()";
     return '''${param.type}.values.firstWhere(
-        (item) => ${_generateMapLookup(enumValueMap, value)} == json['${param.displayName}']${!isIndex ? '.toLowerCase()' : ''},
+        (item) => ${_generateMapLookup(enumValueMap, value)} == json['${param.displayName}']${!isIndex ? '?.toLowerCase()' : ''},
         orElse: () => null)''';
   }
 
@@ -192,7 +195,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
       if (!isPrimitiveType(firstTypeArg)) {
         implicitlyOptedTypes.add(firstTypeArg);
         val =
-            '''${valFn()}.map((item) => ${_generateSerialize('item', firstTypeArg)}).toList()''';
+            '''${valFn()}?.map((item) => ${_generateSerialize('item', firstTypeArg)})?.toList()''';
       }
     } else if (param.type.isDartCoreMap) {
       // TODO(D10100111001): Handle non primitive types
@@ -218,7 +221,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
     if (val == null) useTransform = true;
     val =
         "${val ?? valFn()}${prop.defaultValue != null ? ' ?? ${prop.defaultValue.toString()}' : ''}";
-    return ''''$jsonName': ${useTransform ? converterWrapper(val) : val},''';
+    return ''''$jsonName': ${useTransform ? converterWrapper(val, param.type.isDynamic ? 'dynamic' : null) : val},''';
   }
 
   String _generateEnumToMap(ParameterElement param, JsonEnumProperty enumProp) {
@@ -353,7 +356,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
   }
 
   String _generateSerialize(String val, DartType type) {
-    return 'mapper.serializeToMap<${type}>($val)';
+    return 'mapper.serializeToMap($val)';
   }
 
   String _generateDeserialize(String val, DartType type) {
@@ -370,7 +373,8 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
   }
 
   bool isSkippedType(DartType type) {
-    return type != null && {'DateTime'}.contains(type.toString());
+    return type != null &&
+        ({'DateTime'}.contains(type.toString()) || type.isDynamic);
   }
 
   bool isParamFieldFormal(ParameterElement param) {
@@ -393,7 +397,7 @@ void init() {
   }
 
   String _generateListCast(ClassElement element) {
-    return '''JsonMapper.registerListCast((value) => value.cast<${element.displayName}>().toList());''';
+    return '''JsonMapper.registerListCast((value) => value?.cast<${element.displayName}>()?.toList());''';
   }
 
   String _generateRegistration(ClassElement element) {

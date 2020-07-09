@@ -1,3 +1,21 @@
+## 1.0.2 - 07/06/2020
+* Fix bug by adding null aware operators.
+
+## 1.0.0 - 07/01/2020
+* Fix bugs and remove generic type parameter from the `serialize` and related methods.
+
+## 0.4.4 - 07/01/2020
+* Fix generated code that uses `dynamic` type.
+
+## 0.4.3 - 07/01/2020
+* Skip `dynamic` type processing.
+
+## 0.4.2 - 07/01/2020
+* Add nullable checks to prevent exceptions.
+
+## 0.4.1 - 07/01/2020
+* Fix infinite loop bug.
+
 ## 0.4.0 - 07/01/2020
 * Support list casting for list de-serialization.
 

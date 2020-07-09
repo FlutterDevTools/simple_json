@@ -1,3 +1,12 @@
+## 1.0.2 - 07/02/2020
+* Handle `null` values on both serialization and de-serialization.
+
+## 1.0.1 - 07/01/2020
+* Update the `serialize` method API by removing the generic type parameter from `JsonMapper`.
+
+## 1.0.0 - 07/01/2020
+* Update the `serialize` method API by removing the generic type parameter. The runtimeType is used to match the correct mapper.
+
 ## 0.4.0 - 07/01/2020
 * Support serializing and deserializing of lists. `deserializeList<T>` method was removed. Use the normal `deserialize<T>` (where T is a type of `List<Type>`) method instead.
 

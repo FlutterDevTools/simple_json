@@ -11,11 +11,13 @@ class Product {
       this.expiry,
       this.sizes,
       this.tests,
-      this.attributes});
+      this.attributes,
+      this.parent});
   final String name;
   final ProductType type;
   final DateTime expiry;
   final List<double> sizes;
   final List<Test> tests;
   final Map<String, String> attributes;
+  final Product parent;
 }

@@ -11,20 +11,22 @@ final _productMapper = JsonObjectMapper(
   (CustomJsonMapper mapper, Map<String, dynamic> json) => Product(
     name: mapper.applyFromJsonConverter(json['name']),
     type: mapper.applyFromJsonConverter(ProductType.values.firstWhere(
-        (item) => item.toString().split('.')[1].toLowerCase() == json['type'].toLowerCase(),
+        (item) => item.toString().split('.')[1].toLowerCase() == json['type']?.toLowerCase(),
         orElse: () => null)),
     expiry: mapper.applyFromJsonConverter(json['expiry']),
-    sizes: (json['sizes'] as List).cast<double>().map((item) => mapper.applyFromJsonConverter<double>(item)).toList(),
-    tests: (json['tests'] as List).cast<Map<String, dynamic>>().map((item) => mapper.deserialize<Test>(item)).toList(),
-    attributes: (json['attributes'] as Map<String, dynamic>).cast<String, String>(),
+    sizes: (json['sizes'] as List)?.cast<double>()?.map((item) => mapper.applyFromJsonConverter<double>(item))?.toList(),
+    tests: (json['tests'] as List)?.cast<Map<String, dynamic>>()?.map((item) => mapper.deserialize<Test>(item))?.toList(),
+    attributes: (json['attributes'] as Map<String, dynamic>)?.cast<String, String>(),
+    parent: mapper.deserialize<Product>(json['parent'] as Map<String, dynamic>),
   ),
   (CustomJsonMapper mapper, Product instance) => <String, dynamic>{
     'name': mapper.applyFromInstanceConverter(instance.name),
     'type': mapper.applyFromInstanceConverter(instance.type.toString().split('.')[1]),
     'expiry': mapper.applyFromInstanceConverter(instance.expiry),
     'sizes': mapper.applyFromInstanceConverter(instance.sizes),
-    'tests': instance.tests.map((item) => mapper.serializeToMap<Test>(item)).toList(),
+    'tests': instance.tests?.map((item) => mapper.serializeToMap(item))?.toList(),
     'attributes': mapper.applyFromInstanceConverter(instance.attributes),
+    'parent': mapper.serializeToMap(instance.parent),
   },
 );
 
@@ -52,7 +54,7 @@ final _accountMapper = JsonObjectMapper(
     'amount': mapper.applyFromInstanceConverter(instance.amount),
     'tranCount': mapper.applyFromInstanceConverter(instance.transactionCount ?? 11),
     'isActive': mapper.applyFromInstanceConverter(instance.isActive),
-    'product': mapper.serializeToMap<Product>(instance.product),
+    'product': mapper.serializeToMap(instance.product),
     'closedDate': mapper.applyFromInstanceConverter(instance.closedDate, SpecialDateTimeConverter(true)),
     'openingDate': mapper.applyFromInstanceConverter(instance.openDate),
   },
@@ -67,7 +69,7 @@ final _testMapper = JsonObjectMapper(
   ),
   (CustomJsonMapper mapper, Test instance) => <String, dynamic>{
     'name': mapper.applyFromInstanceConverter(instance.name),
-    'nestedTest': mapper.serializeToMap<NestedTest>(instance.nestedTest),
+    'nestedTest': mapper.serializeToMap(instance.nestedTest),
   },
 );
 
@@ -88,11 +90,11 @@ void init() {
   JsonMapper.register(_testMapper);
   JsonMapper.register(_nestedtestMapper); 
 
-  JsonMapper.registerListCast((value) => value.cast<Product>().toList());
-  JsonMapper.registerListCast((value) => value.cast<Account>().toList());
-  JsonMapper.registerListCast((value) => value.cast<ProductType>().toList());
-  JsonMapper.registerListCast((value) => value.cast<Test>().toList());
-  JsonMapper.registerListCast((value) => value.cast<AccountType>().toList());
-  JsonMapper.registerListCast((value) => value.cast<NestedTest>().toList());
+  JsonMapper.registerListCast((value) => value?.cast<Product>()?.toList());
+  JsonMapper.registerListCast((value) => value?.cast<Account>()?.toList());
+  JsonMapper.registerListCast((value) => value?.cast<ProductType>()?.toList());
+  JsonMapper.registerListCast((value) => value?.cast<Test>()?.toList());
+  JsonMapper.registerListCast((value) => value?.cast<AccountType>()?.toList());
+  JsonMapper.registerListCast((value) => value?.cast<NestedTest>()?.toList());
 }
     

@@ -29,6 +29,14 @@ void main() {
       Test(name: 'blah', nestedTest: NestedTest(ze: 'he')),
     ],
     attributes: {'top': 'kek'},
+    parent: Product(
+      name: 'Parent Test',
+      type: ProductType.Shirt,
+      expiry: DateTime.now().subtract(const Duration(days: 1)),
+      sizes: [22],
+      tests: [],
+      attributes: {'bottom': 'bear'},
+    ),
   );
   final account = Account(
     id: Uuid().v4(),
