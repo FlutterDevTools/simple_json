@@ -90,6 +90,7 @@ class CustomJsonMapper {
   String serialize(Object item) {
     if (item == null) return null;
     final typeName = item.runtimeType.toString();
+    print(typeName);
     return json.encode(_isListWithType(typeName)
         ? (item as List)
             .map((i) => _serializeToMapWithType(typeName, i))
@@ -106,6 +107,7 @@ class CustomJsonMapper {
   Map<String, dynamic> _serializeToMapWithType(String typeName, Object item) {
     if (item == null) return null;
     final typeMap = _getTypeMapWithType(typeName) as dynamic;
+    print(typeMap);
     return typeMap?.toJsonMap(this, item);
   }
 
@@ -136,13 +138,15 @@ class CustomJsonMapper {
   }
 
   static const _ListNameTypeMarker = 'List<';
+  static const _ArrayNameTypeMarker = 'Array<';
 
   bool _isList<T>() {
     return _isListWithType(T.toString());
   }
 
   bool _isListWithType(String typeName) {
-    return typeName.startsWith(_ListNameTypeMarker);
+    return typeName.contains(_ListNameTypeMarker) ||
+        typeName.contains(_ArrayNameTypeMarker);
   }
 
   JsonObjectMapper<dynamic> _getTypeMap<T>() {
@@ -168,8 +172,16 @@ class CustomJsonMapper {
   String _getTypeNameWithName(String typeName) {
     final isList = _isListWithType(typeName);
     if (isList) {
-      typeName =
-          typeName.substring(_ListNameTypeMarker.length, typeName.length - 1);
+      var index;
+      if (typeName.contains(_ListNameTypeMarker))
+        index =
+            typeName.indexOf(_ListNameTypeMarker) + _ListNameTypeMarker.length;
+      else if (typeName.contains(_ArrayNameTypeMarker))
+        index = typeName.indexOf(_ArrayNameTypeMarker) +
+            _ArrayNameTypeMarker.length;
+
+      if (index != null)
+        typeName = typeName.substring(index, typeName.length - 1);
     }
     return typeName;
   }

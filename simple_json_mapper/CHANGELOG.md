@@ -1,3 +1,6 @@
+## 1.1.0 - 07/09/2020
+* Fix bug with list serialization.
+
 ## 1.0.2 - 07/02/2020
 * Handle `null` values on both serialization and de-serialization.
 

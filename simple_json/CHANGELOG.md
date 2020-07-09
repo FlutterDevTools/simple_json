@@ -1,3 +1,6 @@
+## 1.1.0 - 07/09/2020
+* Bug fix and keep version in sync.
+
 ## 1.0.2 - 07/06/2020
 * Fix bug by adding null aware operators.
 
