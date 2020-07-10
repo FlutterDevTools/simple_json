@@ -1,3 +1,6 @@
+## 1.1.1 - 07/09/2020
+* Add `verbose` option for logging.
+
 ## 1.1.0 - 07/09/2020
 * Fix bug with list serialization.
 

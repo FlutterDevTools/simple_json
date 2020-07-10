@@ -15,7 +15,8 @@ class JsonObjectMapper<T> {
 }
 
 class JsonMapper {
-  static CustomJsonMapper _instance = CustomJsonMapper();
+  static bool verbose = false;
+  static CustomJsonMapper _instance = CustomJsonMapper(verbose: verbose);
   static bool isMapperRegistered<T>() => _instance.isMapperRegistered<T>();
   static bool isConverterRegistered<T>() =>
       _instance.isConverterRegistered<T>();
@@ -43,7 +44,9 @@ class JsonMapper {
 typedef ListCastFunction<T> = List<T> Function(List<dynamic> list);
 
 class CustomJsonMapper {
-  CustomJsonMapper({List<JsonConverter<dynamic, dynamic>> converters}) {
+  CustomJsonMapper(
+      {this.verbose = false,
+      List<JsonConverter<dynamic, dynamic>> converters}) {
     if (converters != null)
       _converters.addAll(converters
           .fold(<String, JsonConverter<dynamic, dynamic>>{}, (map, converter) {
@@ -51,6 +54,8 @@ class CustomJsonMapper {
         return map;
       }));
   }
+
+  final bool verbose;
 
   static final _mapper = <String, JsonObjectMapper<dynamic>>{};
   static final _listCasts = <String, ListCastFunction>{};
@@ -90,7 +95,7 @@ class CustomJsonMapper {
   String serialize(Object item) {
     if (item == null) return null;
     final typeName = item.runtimeType.toString();
-    print(typeName);
+    if (verbose) print(typeName);
     return json.encode(_isListWithType(typeName)
         ? (item as List)
             .map((i) => _serializeToMapWithType(typeName, i))
@@ -107,7 +112,7 @@ class CustomJsonMapper {
   Map<String, dynamic> _serializeToMapWithType(String typeName, Object item) {
     if (item == null) return null;
     final typeMap = _getTypeMapWithType(typeName) as dynamic;
-    print(typeMap);
+    if (verbose) print(typeMap);
     return typeMap?.toJsonMap(this, item);
   }
 
