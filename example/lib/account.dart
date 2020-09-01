@@ -23,6 +23,7 @@ class Account extends BaseAccount {
       this.isActive,
       this.product,
       this.localText,
+      this.refreshFrequeuncy = const Duration(minutes: 30),
       DateTime closedDate,
       DateTime openDate})
       : super(openDate: openDate, closedDate: closedDate);
@@ -33,6 +34,7 @@ class Account extends BaseAccount {
   final String name;
   final String number;
   final double amount;
+  final Duration refreshFrequeuncy;
 
   @JsonProperty(name: 'tranCount', defaultValue: 11)
   final int transactionCount;

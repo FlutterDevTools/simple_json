@@ -364,7 +364,7 @@ packages:
       name: simple_json_mapper
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.1.0"
+    version: "1.1.2"
   source_gen:
     dependency: "direct main"
     description:

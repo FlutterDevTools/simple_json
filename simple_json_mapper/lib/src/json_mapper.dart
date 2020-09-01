@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:simple_json_mapper/simple_json_mapper.dart';
+import 'package:simple_json_mapper/src/converters/duration.dart';
 
 import 'converters/datetime.dart';
 import 'json_converter.dart';
@@ -62,6 +63,7 @@ class CustomJsonMapper {
 
   final _converters = <String, JsonConverter<dynamic, dynamic>>{
     (DateTime).toString(): const DefaultISO8601DateConverter(),
+    (Duration).toString(): const DefaultDurationConverter(),
   };
 
   bool isMapperRegistered<T>() {

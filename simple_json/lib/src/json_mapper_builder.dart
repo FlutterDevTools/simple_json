@@ -374,7 +374,8 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
 
   bool isSkippedType(DartType type) {
     return type != null &&
-        ({'DateTime'}.contains(type.toString()) || type.isDynamic);
+        ({'$DateTime', '$Duration'}.contains(type.toString()) ||
+            type.isDynamic);
   }
 
   bool isParamFieldFormal(ParameterElement param) {
@@ -382,7 +383,8 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
   }
 
   bool isParamEnum(FieldFormalParameterElement param) {
-    return (param.field.type.element as ClassElement).isEnum;
+    return param.field.type.element is ClassElement &&
+        (param.field.type.element as ClassElement).isEnum;
   }
 
   String _generateInit(List<ClassElement> registrationElements,

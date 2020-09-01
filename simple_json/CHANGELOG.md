@@ -1,3 +1,9 @@
+## 1.1.2 - 08/31/2020
+* Support `Duration` class serialization.
+
+## 1.1.1 - 07/09/2020
+* Bug fix with dynamic type.
+
 ## 1.1.0 - 07/09/2020
 * Bug fix and keep version in sync.
 

@@ -1,3 +1,6 @@
+## 1.1.2 - 08/31/2020
+* Support `Duration` class serialization.
+
 ## 1.1.1 - 07/09/2020
 * Add `verbose` option for logging.
 

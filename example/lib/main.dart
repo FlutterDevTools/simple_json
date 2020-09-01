@@ -1,4 +1,5 @@
 import 'package:simple_json_example/converters/special_datetime.dart';
+import 'package:simple_json_example/wrapper.dart';
 import 'package:simple_json_mapper/simple_json_mapper.dart';
 import 'package:simple_json_example/account.dart';
 import 'package:simple_json_example/product.dart';
@@ -19,13 +20,14 @@ void main() {
 
   // Converter for transforming all DateTime string values to a special format defined by the given class.
   JsonMapper.registerConverter(SpecialDateTimeConverter());
+  final okTest = Test(name: 'hello', nestedTest: NestedTest(ze: 'ok'));
   final product = Product(
     name: 'Test',
     type: ProductType.Shoe,
     expiry: DateTime.now(),
     sizes: [10, 8, 5.5],
     tests: [
-      Test(name: 'hello', nestedTest: NestedTest(ze: 'ok')),
+      okTest,
       Test(name: 'blah', nestedTest: NestedTest(ze: 'he')),
     ],
     attributes: {'top': 'kek'},
@@ -38,6 +40,14 @@ void main() {
       attributes: {'bottom': 'bear'},
     ),
   );
+  // final wrapper = Wrapper<Product>(data: product, test: okTest);
+  // print('Serialized Product Wrapper:');
+  // final serializedWrapper = JsonMapper.serialize(wrapper);
+  // print(serializedWrapper);
+  // print('\nRe-serialized Product Wrapper:');
+  // print(JsonMapper.serialize(
+  //     JsonMapper.deserialize<Wrapper<Product>>(serializedWrapper)));
+
   final account = Account(
     id: Uuid().v4(),
     type: AccountType.Checking,

@@ -4,7 +4,7 @@ environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
-  simple_json_mapper: ^1.1.0
+  simple_json_mapper: ^1.1.1
   uuid: ^2.1.0
 
 dependency_overrides:
