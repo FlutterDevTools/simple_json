@@ -1,4 +1,6 @@
+import 'package:simple_json_example/converters/regex.dart';
 import 'package:simple_json_example/converters/special_datetime.dart';
+import 'package:simple_json_example/converters/uri.dart';
 import 'package:simple_json_example/wrapper.dart';
 import 'package:simple_json_mapper/simple_json_mapper.dart';
 import 'package:simple_json_example/account.dart';
@@ -19,11 +21,13 @@ void main() {
   );
 
   // Converter for transforming all DateTime string values to a special format defined by the given class.
-  JsonMapper.registerConverter(SpecialDateTimeConverter());
+  // JsonMapper.registerConverter(SpecialDateTimeConverter());
   final okTest = Test(name: 'hello', nestedTest: NestedTest(ze: 'ok'));
   final product = Product(
     name: 'Test',
     type: ProductType.Shoe,
+    productDetails: Uri.parse('http://test.com'),
+    productMatchPattern: RegExp(r'\w+'),
     expiry: DateTime.now(),
     sizes: [10, 8, 5.5],
     tests: [
@@ -33,6 +37,8 @@ void main() {
     attributes: {'top': 'kek'},
     parent: Product(
       name: 'Parent Test',
+      productDetails: Uri.parse('http://blah.com'),
+      productMatchPattern: RegExp(r'\d+'),
       type: ProductType.Shirt,
       expiry: DateTime.now().subtract(const Duration(days: 1)),
       sizes: [22],
@@ -51,6 +57,7 @@ void main() {
   final account = Account(
     id: Uuid().v4(),
     type: AccountType.Checking,
+    // features: [AccountFeature.Cashback, AccountFeature.Rewards],
     name: 'Test',
     number: 'xxx12414',
     amount: 100.50,
@@ -78,6 +85,8 @@ void main() {
         fromJson: (value) => value == 1 ? true : false,
         toJson: (value) => value ? 1 : 0,
       ),
+      RegExpConverter(),
+      UriConverter(),
     ],
   );
   // Note the usage of [customerMapper] here.

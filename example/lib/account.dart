@@ -16,6 +16,7 @@ class Account extends BaseAccount {
   const Account(
       {this.id,
       this.type,
+      // this.features,
       this.name,
       this.number,
       this.amount,
@@ -31,6 +32,7 @@ class Account extends BaseAccount {
   final String id;
   @JEnumProp(serializationType: SerializationType.Index)
   final AccountType type;
+  // final List<AccountFeature> features;
   final String name;
   final String number;
   final double amount;
@@ -53,3 +55,8 @@ enum AccountType {
   @EnumValue(value: 10)
   Checking
 }
+
+// enum AccountFeature {
+//   Cashback,
+//   Rewards,
+// }

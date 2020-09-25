@@ -368,17 +368,17 @@ packages:
   simple_json:
     dependency: "direct dev"
     description:
-      path: "..\\simple_json"
+      path: "../simple_json"
       relative: true
     source: path
-    version: "1.1.1"
+    version: "1.1.2"
   simple_json_mapper:
     dependency: "direct main"
     description:
-      path: "..\\simple_json_mapper"
+      path: "../simple_json_mapper"
       relative: true
     source: path
-    version: "1.1.1"
+    version: "1.1.2"
   source_gen:
     dependency: transitive
     description:

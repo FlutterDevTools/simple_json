@@ -16,6 +16,7 @@ class JsonMapperBuilder implements Builder {
 
   final implicitlyOptedTypes = Set<DartType>();
   final usedElements = Set<Element>();
+  final skippedTypes = {'$DateTime', '$Duration'};
 
   @override
   Map<String, List<String>> get buildExtensions {
@@ -34,18 +35,29 @@ class JsonMapperBuilder implements Builder {
   @override
   Future<void> build(BuildStep buildStep) async {
     final lines = <String>[];
-    final classesInLibrary = <ClassElement>[];
+    final annotatedClassesInLibrary = <ClassElement>[];
+    final converterClasses = <ClassElement>[];
     await for (final input in buildStep.findAssets(_allFilesInLib)) {
       if (!await buildStep.resolver.isLibrary(input)) continue;
       final library = await buildStep.resolver.libraryFor(input);
-      classesInLibrary.addAll(LibraryReader(library)
+      final reader = LibraryReader(library);
+      converterClasses.addAll(reader.classes.where((c) =>
+          TypeChecker.fromRuntime(JsonConverter)
+              .isSuperOf(reader.classes.toList()[0])));
+
+      annotatedClassesInLibrary.addAll(reader
           .annotatedWith(TypeChecker.fromRuntime(JsonObject))
           .where((match) => match.element is ClassElement)
           .map((match) => match.element as ClassElement)
           .toList());
     }
 
-    final annotatedClasses = classesInLibrary.toSet();
+    skippedTypes.addAll(converterClasses
+        .map((c) => c.supertype.typeArguments[1])
+        .where((type) => !isPrimitiveType(type))
+        .map((t) => t.getDisplayString())
+        .toList());
+    final annotatedClasses = annotatedClassesInLibrary.toSet();
     final aliases = annotatedClasses.where((libClass) {
       final redirectedCtor = libClass.unnamedConstructor?.redirectedConstructor;
       final superTypeCtor = libClass.supertype?.element?.unnamedConstructor;
@@ -78,13 +90,15 @@ class JsonMapperBuilder implements Builder {
         'WARNING: Generated mappings for the following unannotated types: ${allImplicitlyOptedClasses.map((t) => t.toString()).join(', ')}');
 
     final classes = [...annotatedClasses, ...allImplicitlyOptedClasses];
-    final imports = _generateHeader([...classes, ...usedElements]);
+    final imports =
+        _generateHeader([...classes, ...converterClasses, ...usedElements]);
     final registrations = _generateInit(
         classes
             .where((c) =>
                 c.unnamedConstructor != null && !c.isEnum && !c.isAbstract)
             .toList(),
-        classes);
+        classes,
+        converterClasses);
 
     lines.add(imports);
     lines.addAll(mappers);
@@ -374,8 +388,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
 
   bool isSkippedType(DartType type) {
     return type != null &&
-        ({'$DateTime', '$Duration'}.contains(type.toString()) ||
-            type.isDynamic);
+        (skippedTypes.contains(type.toString()) || type.isDynamic);
   }
 
   bool isParamFieldFormal(ParameterElement param) {
@@ -387,11 +400,15 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
         (param.field.type.element as ClassElement).isEnum;
   }
 
-  String _generateInit(List<ClassElement> registrationElements,
-      List<ClassElement> listCastElements) {
+  String _generateInit(
+      List<ClassElement> registrationElements,
+      List<ClassElement> listCastElements,
+      List<ClassElement> converterClassElements) {
     return '''
 void init() {
   ${registrationElements.map(_generateRegistration).join('\n  ')} 
+
+  ${converterClassElements.map(_generateConverter).join('\n  ')}
 
   ${listCastElements.map(_generateListCast).join('\n  ')}
 }
@@ -400,6 +417,10 @@ void init() {
 
   String _generateListCast(ClassElement element) {
     return '''JsonMapper.registerListCast((value) => value?.cast<${element.displayName}>()?.toList());''';
+  }
+
+  String _generateConverter(ClassElement element) {
+    return '''JsonMapper.registerConverter(${element.displayName}());''';
   }
 
   String _generateRegistration(ClassElement element) {
