@@ -1,3 +1,6 @@
+## 1.1.4 - 09/29/2020
+* Fix list skipped types.
+
 ## 1.1.3 - 09/24/2020
 * Add support for automatic registration of custom converters that use the `JsonConvert<TFrom, TTo>` class as the super type.
 

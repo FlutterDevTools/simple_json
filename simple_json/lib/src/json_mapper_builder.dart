@@ -147,7 +147,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
     if (param.type.isDartCoreList) {
       final typeArgs = (param.type as InterfaceType).typeArguments;
       final firstTypeArg = typeArgs.isNotEmpty ? typeArgs.first : null;
-      if (!isPrimitiveType(firstTypeArg)) {
+      if (!isPrimitiveType(firstTypeArg) && !isSkippedType(firstTypeArg)) {
         implicitlyOptedTypes.add(firstTypeArg);
         val =
             '''(${valFn('List')})?.cast<Map<String, dynamic>>()?.map((item) => ${_generateDeserialize('item', firstTypeArg)})?.toList()''';
