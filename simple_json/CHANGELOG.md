@@ -1,3 +1,6 @@
+## 1.1.6 - 09/29/2020
+* Fix bug with converter types.
+
 ## 1.1.5 - 09/29/2020
 * Fix list converter types.
 

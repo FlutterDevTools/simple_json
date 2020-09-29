@@ -22,7 +22,7 @@ final _productMapper = JsonObjectMapper(
     productMatchPattern: mapper.applyFromJsonConverter(json['productMatchPattern']),
     attributes: (json['attributes'] as Map<String, dynamic>)?.cast<String, String>(),
     parent: mapper.deserialize<Product>(json['parent'] as Map<String, dynamic>),
-    timeline: (json['timeline'] as List)?.map((item) => mapper.applyFromJsonConverter<DateTime>(item))?.toList(),
+    timeline: (json['timeline'] as List)?.map((dynamic item) => mapper.applyFromJsonConverter<DateTime>(item))?.toList(),
   ),
   (CustomJsonMapper mapper, Product instance) => <String, dynamic>{
     'name': mapper.applyFromInstanceConverter(instance.name),
@@ -34,7 +34,7 @@ final _productMapper = JsonObjectMapper(
     'productMatchPattern': mapper.applyFromInstanceConverter(instance.productMatchPattern),
     'attributes': mapper.applyFromInstanceConverter(instance.attributes),
     'parent': mapper.serializeToMap(instance.parent),
-    'timeline': instance.timeline?.map((item) => mapper.applyFromInstanceConverter(item))?.toList(),
+    'timeline': instance.timeline?.map<dynamic>((item) => mapper.applyFromInstanceConverter(item))?.toList(),
   },
 );
 

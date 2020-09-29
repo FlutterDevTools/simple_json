@@ -154,7 +154,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
       } else {
         final isConverter = isConverterType(firstTypeArg);
         val =
-            '''(${valFn('List')})?${isConverter ? '' : '.cast<${firstTypeArg.toString()}>()?'}.map((item) => ${converterWrapper('item', firstTypeArg.toString())})?.toList()''';
+            '''(${valFn('List')})?${isConverter ? '' : '.cast<${firstTypeArg.toString()}>()?'}.map((${isConverter ? 'dynamic ' : ''}item) => ${converterWrapper('item', firstTypeArg.toString())})?.toList()''';
       }
     } else if (param.type.isDartCoreMap) {
       // TODO(D10100111001): Handle non primitive types
@@ -212,7 +212,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
         if (!isSkippedType(firstTypeArg))
           implicitlyOptedTypes.add(firstTypeArg);
         val =
-            '''${valFn()}?.map((item) => ${isConverter ? converterWrapper('item') : _generateSerialize('item', firstTypeArg)})?.toList()''';
+            '''${valFn()}?.map${isConverter ? '<dynamic>' : ''}((item) => ${isConverter ? converterWrapper('item') : _generateSerialize('item', firstTypeArg)})?.toList()''';
       }
     } else if (param.type.isDartCoreMap) {
       // TODO(D10100111001): Handle non primitive types
