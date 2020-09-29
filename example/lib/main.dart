@@ -24,28 +24,28 @@ void main() {
   // JsonMapper.registerConverter(SpecialDateTimeConverter());
   final okTest = Test(name: 'hello', nestedTest: NestedTest(ze: 'ok'));
   final product = Product(
-    name: 'Test',
-    type: ProductType.Shoe,
-    productDetails: Uri.parse('http://test.com'),
-    productMatchPattern: RegExp(r'\w+'),
-    expiry: DateTime.now(),
-    sizes: [10, 8, 5.5],
-    tests: [
-      okTest,
-      Test(name: 'blah', nestedTest: NestedTest(ze: 'he')),
-    ],
-    attributes: {'top': 'kek'},
-    parent: Product(
-      name: 'Parent Test',
-      productDetails: Uri.parse('http://blah.com'),
-      productMatchPattern: RegExp(r'\d+'),
-      type: ProductType.Shirt,
-      expiry: DateTime.now().subtract(const Duration(days: 1)),
-      sizes: [22],
-      tests: [],
-      attributes: {'bottom': 'bear'},
-    ),
-  );
+      name: 'Test',
+      type: ProductType.Shoe,
+      productDetails: Uri.parse('http://test.com'),
+      productMatchPattern: RegExp(r'\w+'),
+      expiry: DateTime.now(),
+      sizes: [10, 8, 5.5],
+      tests: [
+        okTest,
+        Test(name: 'blah', nestedTest: NestedTest(ze: 'he')),
+      ],
+      attributes: {'top': 'kek'},
+      parent: Product(
+        name: 'Parent Test',
+        productDetails: Uri.parse('http://blah.com'),
+        productMatchPattern: RegExp(r'\d+'),
+        type: ProductType.Shirt,
+        expiry: DateTime.now().subtract(const Duration(days: 1)),
+        sizes: [22],
+        tests: [],
+        attributes: {'bottom': 'bear'},
+      ),
+      timeline: [DateTime.now()]);
   // final wrapper = Wrapper<Product>(data: product, test: okTest);
   // print('Serialized Product Wrapper:');
   // final serializedWrapper = JsonMapper.serialize(wrapper);

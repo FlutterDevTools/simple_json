@@ -1,3 +1,6 @@
+## 1.1.5 - 09/29/2020
+* Fix list converter types.
+
 ## 1.1.4 - 09/29/2020
 * Fix list skipped types.
 

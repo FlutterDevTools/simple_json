@@ -16,7 +16,7 @@ class JsonMapperBuilder implements Builder {
 
   final implicitlyOptedTypes = Set<DartType>();
   final usedElements = Set<Element>();
-  final skippedTypes = {'$DateTime', '$Duration'};
+  final converterTypes = {'$DateTime', '$Duration'};
 
   @override
   Map<String, List<String>> get buildExtensions {
@@ -52,7 +52,7 @@ class JsonMapperBuilder implements Builder {
           .toList());
     }
 
-    skippedTypes.addAll(converterClasses
+    converterTypes.addAll(converterClasses
         .map((c) => c.supertype.typeArguments[1])
         .where((type) => !isPrimitiveType(type))
         .map((t) => t.getDisplayString())
@@ -152,8 +152,9 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
         val =
             '''(${valFn('List')})?.cast<Map<String, dynamic>>()?.map((item) => ${_generateDeserialize('item', firstTypeArg)})?.toList()''';
       } else {
+        final isConverter = isConverterType(firstTypeArg);
         val =
-            '''(${valFn('List')})?.cast<${firstTypeArg.toString()}>()?.map((item) => ${converterWrapper('item', firstTypeArg.toString())})?.toList()''';
+            '''(${valFn('List')})?${isConverter ? '' : '.cast<${firstTypeArg.toString()}>()?'}.map((item) => ${converterWrapper('item', firstTypeArg.toString())})?.toList()''';
       }
     } else if (param.type.isDartCoreMap) {
       // TODO(D10100111001): Handle non primitive types
@@ -206,10 +207,12 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
     if (param.type.isDartCoreList) {
       final typeArgs = (param.type as InterfaceType).typeArguments;
       final firstTypeArg = typeArgs.isNotEmpty ? typeArgs.first : null;
+      final isConverter = isConverterType(firstTypeArg);
       if (!isPrimitiveType(firstTypeArg)) {
-        implicitlyOptedTypes.add(firstTypeArg);
+        if (!isSkippedType(firstTypeArg))
+          implicitlyOptedTypes.add(firstTypeArg);
         val =
-            '''${valFn()}?.map((item) => ${_generateSerialize('item', firstTypeArg)})?.toList()''';
+            '''${valFn()}?.map((item) => ${isConverter ? converterWrapper('item') : _generateSerialize('item', firstTypeArg)})?.toList()''';
       }
     } else if (param.type.isDartCoreMap) {
       // TODO(D10100111001): Handle non primitive types
@@ -386,9 +389,11 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
             type.isDartCoreString);
   }
 
+  bool isConverterType(DartType type) =>
+      converterTypes.contains(type.toString());
+
   bool isSkippedType(DartType type) {
-    return type != null &&
-        (skippedTypes.contains(type.toString()) || type.isDynamic);
+    return type != null && (isConverterType(type) || type.isDynamic);
   }
 
   bool isParamFieldFormal(ParameterElement param) {
