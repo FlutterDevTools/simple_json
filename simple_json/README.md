@@ -71,7 +71,7 @@ dependencies:
   simple_json_mapper: ^1.1.2
 
 dev_dependencies:
-  simple_json: ^1.1.6
+  simple_json: ^1.1.7
   build_runner: ^1.10.0
 ```
 

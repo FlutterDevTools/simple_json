@@ -1,3 +1,6 @@
+## 1.1.7 - 10/15/2020
+* Fix bug to allow null enum values.
+
 ## 1.1.6 - 09/29/2020
 * Fix bug with converter types.
 

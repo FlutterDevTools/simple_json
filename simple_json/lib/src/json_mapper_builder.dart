@@ -242,7 +242,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
   }
 
   String _generateEnumToMap(ParameterElement param, JsonEnumProperty enumProp) {
-    return '''${enumProp.serializationType == SerializationType.Index ? '.index' : ".toString().split('.')[1]"}''';
+    return '''${enumProp.serializationType == SerializationType.Index ? '?.index' : "?.toString()?.split('.')?.elementAt(1)"}''';
   }
 
   String _generateMapLookup(Map<dynamic, dynamic> map, String val) {
