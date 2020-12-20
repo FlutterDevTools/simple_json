@@ -26,7 +26,7 @@ final _productMapper = JsonObjectMapper(
   ),
   (CustomJsonMapper mapper, Product instance) => <String, dynamic>{
     'name': mapper.applyFromInstanceConverter(instance.name),
-    'type': mapper.applyFromInstanceConverter(instance.type.toString().split('.')[1]),
+    'type': mapper.applyFromInstanceConverter(instance.type?.toString()?.split('.')?.elementAt(1)),
     'expiry': mapper.applyFromInstanceConverter(instance.expiry),
     'productDetails': mapper.applyFromInstanceConverter(instance.productDetails),
     'sizes': mapper.applyFromInstanceConverter(instance.sizes),
@@ -85,7 +85,7 @@ final _accountMapper = JsonObjectMapper(
   ),
   (CustomJsonMapper mapper, Account instance) => <String, dynamic>{
     'id': mapper.applyFromInstanceConverter(instance.id),
-    'type': mapper.applyFromInstanceConverter(({0: 25, 1: 10}[instance.type.index] ?? instance.type.index)),
+    'type': mapper.applyFromInstanceConverter(({0: 25, 1: 10}[instance.type?.index] ?? instance.type?.index)),
     'name': mapper.applyFromInstanceConverter(instance.name),
     'number': mapper.applyFromInstanceConverter(instance.number),
     'amount': mapper.applyFromInstanceConverter(instance.amount),

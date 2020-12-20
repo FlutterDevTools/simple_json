@@ -56,7 +56,7 @@ enum AccountType {
   Checking
 }
 
-// enum AccountFeature {
-//   Cashback,
-//   Rewards,
-// }
+enum AccountFeature {
+  Cashback,
+  Rewards,
+}

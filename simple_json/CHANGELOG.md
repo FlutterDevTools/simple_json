@@ -1,3 +1,9 @@
+## 1.2.0 - 12/20/2020
+* Update dependencies and support nullability language changes.
+
+## 1.1.8 - 12/20/2020
+* Update dependency versions
+
 ## 1.1.7 - 10/15/2020
 * Fix bug to allow null enum values.
 

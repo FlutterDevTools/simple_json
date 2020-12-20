@@ -55,7 +55,7 @@ class JsonMapperBuilder implements Builder {
     converterTypes.addAll(converterClasses
         .map((c) => c.supertype.typeArguments[1])
         .where((type) => !isPrimitiveType(type))
-        .map((t) => t.getDisplayString())
+        .map((t) => t.getDisplayString(withNullability: false))
         .toList());
     final annotatedClasses = annotatedClassesInLibrary.toSet();
     final aliases = annotatedClasses.where((libClass) {
@@ -112,7 +112,7 @@ class JsonMapperBuilder implements Builder {
         element.isEnum ||
         element.isAbstract) return '';
 
-    final elementName = element.displayName;
+    final elementName = element.name;
     final parameters = element.unnamedConstructor.parameters;
     return '''
 
@@ -131,7 +131,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
     final converterProp = getConverterProp(param);
     final prop = getProp(param);
     if (prop.ignore) return null;
-    final name = param.displayName;
+    final name = param.name;
     final jsonName = prop.name ?? name;
     final accessorStr = "json['$jsonName']";
     final converterWrapper = (String val, [String type]) =>
@@ -143,18 +143,33 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
           : accessorStr;
       return '''$accStr${asType != null ? ' as $asType' : ''}''';
     };
+    final _genEnum = (ParameterElement param, {DartType type, String name}) {
+      implicitlyOptedTypes.add(param.type);
+      final enumProp = getEnumProp(param);
+      final enumValueMap = cleanMap(getEnumValueMap(enumProp,
+          param: param, enumClassEl: type?.element as ClassElement));
+      return converterWrapper(_generateEnumFromMap(
+          type ?? param.type, name ?? param.name, enumProp, enumValueMap));
+    };
     var val;
     if (param.type.isDartCoreList) {
       final typeArgs = (param.type as InterfaceType).typeArguments;
       final firstTypeArg = typeArgs.isNotEmpty ? typeArgs.first : null;
       if (!isPrimitiveType(firstTypeArg) && !isSkippedType(firstTypeArg)) {
         implicitlyOptedTypes.add(firstTypeArg);
+        final isEnum = firstTypeArg.element is ClassElement &&
+            (firstTypeArg.element as ClassElement).isEnum;
+        final mapBody = isEnum
+            ? _genEnum(param,
+                type: firstTypeArg,
+                name: firstTypeArg.getDisplayString(withNullability: false))
+            : _generateDeserialize('item', firstTypeArg);
         val =
-            '''(${valFn('List')})?.cast<Map<String, dynamic>>()?.map((item) => ${_generateDeserialize('item', firstTypeArg)})?.toList()''';
+            '''(${valFn('List')})?.cast<Map<String, dynamic>>()?.map((item) => $mapBody)?.toList()''';
       } else {
         final isConverter = isConverterType(firstTypeArg);
         val =
-            '''(${valFn('List')})?${isConverter ? '' : '.cast<${firstTypeArg.toString()}>()?'}.map((${isConverter ? 'dynamic ' : ''}item) => ${converterWrapper('item', firstTypeArg.toString())})?.toList()''';
+            '''(${valFn('List')})?${isConverter ? '' : '.cast<${firstTypeArg.element.name}>()?'}.map((${isConverter ? 'dynamic ' : ''}item) => ${converterWrapper('item', firstTypeArg.element.name)})?.toList()''';
       }
     } else if (param.type.isDartCoreMap) {
       // TODO(D10100111001): Handle non primitive types
@@ -166,13 +181,9 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
       if (!isPrimitiveType(secondTypeArg))
         implicitlyOptedTypes.add(secondTypeArg);
       val =
-          '(${valFn('Map<String, dynamic>')})?.cast<${firstTypeArg.toString()}, ${secondTypeArg.toString()}>()';
+          '(${valFn('Map<String, dynamic>')})?.cast<${firstTypeArg.element.name}, ${secondTypeArg.element.name}>()';
     } else if (isParamFieldFormal(param) && isParamEnum(param)) {
-      implicitlyOptedTypes.add(param.type);
-      final enumProp = getEnumProp(param);
-      final enumValueMap = cleanMap(getEnumValueMap(param, enumProp));
-      val =
-          converterWrapper(_generateEnumFromMap(param, enumProp, enumValueMap));
+      val = _genEnum(param);
     } else if (!isPrimitiveType(param.type) &&
         !isSkippedType(param.type) &&
         val == null) {
@@ -182,13 +193,13 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
     return '''$name: ${val ?? valFn()}${prop.defaultValue != null ? ' ?? ${prop.defaultValue.toString()}' : ''},''';
   }
 
-  String _generateEnumFromMap(ParameterElement param, JsonEnumProperty enumProp,
-      Map<dynamic, dynamic> enumValueMap) {
+  String _generateEnumFromMap(DartType type, String name,
+      JsonEnumProperty enumProp, Map<dynamic, dynamic> enumValueMap) {
     final isIndex = enumProp.serializationType == SerializationType.Index;
     final value =
         isIndex ? 'item.index' : "item.toString().split('.')[1].toLowerCase()";
-    return '''${param.type}.values.firstWhere(
-        (item) => ${_generateMapLookup(enumValueMap, value)} == json['${param.displayName}']${!isIndex ? '?.toLowerCase()' : ''},
+    return '''${type.element.name}.values.firstWhere(
+        (item) => ${_generateMapLookup(enumValueMap, value)} == json['$name']${!isIndex ? '?.toLowerCase()' : ''},
         orElse: () => null)''';
   }
 
@@ -196,7 +207,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
     final converterProp = getConverterProp(param);
     final prop = getProp(param);
     if (prop.ignore) return null;
-    final name = param.displayName;
+    final name = param.name;
     final jsonName = prop.name ?? name;
     final converterWrapper = (String val, [String type]) =>
         'mapper.applyFromInstanceConverter${type != null ? '<$type>' : ''}($val${converterProp != null ? ', $converterProp' : ''})';
@@ -225,7 +236,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
         implicitlyOptedTypes.add(secondTypeArg);
     } else if (isParamFieldFormal(param) && isParamEnum(param)) {
       final enumProp = getEnumProp(param);
-      final enumValueMap = cleanMap(getEnumValueMap(param, enumProp));
+      final enumValueMap = cleanMap(getEnumValueMap(enumProp, param: param));
       val = _generateMapLookup(
           enumValueMap, '${valFn()}${_generateEnumToMap(param, enumProp)}');
       useTransform = true;
@@ -256,7 +267,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
         ?.element;
     while (superElement != null) {
       final field = superElement?.fields
-          ?.firstWhere((f) => f.displayName == param.name, orElse: () => null);
+          ?.firstWhere((f) => f.name == param.name, orElse: () => null);
       if (field != null)
         return field;
       else
@@ -304,7 +315,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
     if (element == null) return null;
     usedElements.add(element);
     final params = element.unnamedConstructor?.parameters;
-    final getValue = (ParameterElement p) => obj.getField(p.displayName);
+    final getValue = (ParameterElement p) => obj.getField(p.name);
     final valueFn = (ParameterElement p) =>
         p != null ? ConstantReader(getValue(p)).literalValue : null;
     final positionalParams = params
@@ -313,7 +324,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
         .toList();
     final namedParams = params
         .where((p) => p.isNamed && getValue(p) != null)
-        .map((p) => '${p.displayName}: ${valueFn(p)}')
+        .map((p) => '${p.name}: ${valueFn(p)}')
         .toList();
     return '${element.name}(${[
       ...positionalParams,
@@ -336,12 +347,14 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
   }
 
   Map<dynamic, dynamic> getEnumValueMap(
-      ParameterElement param, JsonEnumProperty enumProp) {
+    JsonEnumProperty enumProp, {
+    ParameterElement param,
+    ClassElement enumClassEl,
+  }) {
     final propChecker = TypeChecker.fromRuntime(EnumValue);
-    final enumElement = ((param as FieldFormalParameterElement)
-        .field
-        .type
-        .element as ClassElement);
+    final enumElement = enumClassEl ??
+        ((param as FieldFormalParameterElement).field.type.element
+            as ClassElement);
     final enumFields =
         enumElement.fields.where((e) => e.isEnumConstant).toList();
     final enumValProps = enumFields
@@ -349,7 +362,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
         .toList();
     return enumFields.asMap().entries.fold(<dynamic, dynamic>{},
         (map, fieldEntry) {
-      final displayName = fieldEntry.value.displayName;
+      final displayName = fieldEntry.value.name;
       final key = enumProp.serializationType == SerializationType.Index
           ? ConstantReader(enumElement
                   .getField(displayName)
@@ -377,7 +390,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
   }
 
   String _generateDeserialize(String val, DartType type) {
-    return 'mapper.deserialize<${type}>($val)';
+    return 'mapper.deserialize<${type.getDisplayString(withNullability: false)}>($val)';
   }
 
   bool isPrimitiveType(DartType type) {
@@ -390,7 +403,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
   }
 
   bool isConverterType(DartType type) =>
-      converterTypes.contains(type.toString());
+      converterTypes.contains(type.element.name);
 
   bool isSkippedType(DartType type) {
     return type != null && (isConverterType(type) || type.isDynamic);
@@ -421,15 +434,15 @@ void init() {
   }
 
   String _generateListCast(ClassElement element) {
-    return '''JsonMapper.registerListCast((value) => value?.cast<${element.displayName}>()?.toList());''';
+    return '''JsonMapper.registerListCast((value) => value?.cast<${element.name}>()?.toList());''';
   }
 
   String _generateConverter(ClassElement element) {
-    return '''JsonMapper.registerConverter(${element.displayName}());''';
+    return '''JsonMapper.registerConverter(${element.name}());''';
   }
 
   String _generateRegistration(ClassElement element) {
-    return '''JsonMapper.register(_${element.displayName.toLowerCase()}Mapper);''';
+    return '''JsonMapper.register(_${element.name.toLowerCase()}Mapper);''';
   }
 
   String _generateHeader(List<Element> elements) {
