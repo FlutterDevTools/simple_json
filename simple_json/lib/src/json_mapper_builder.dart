@@ -182,7 +182,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
         implicitlyOptedTypes.add(secondTypeArg);
       val =
           '(${valFn('Map<String, dynamic>')})?.cast<${firstTypeArg.element.name}, ${secondTypeArg.element.name}>()';
-    } else if (isParamFieldFormal(param) && isParamEnum(param)) {
+    } else if (isParamEnum(param)) {
       val = _genEnum(param);
     } else if (!isPrimitiveType(param.type) &&
         !isSkippedType(param.type) &&
@@ -234,7 +234,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
         implicitlyOptedTypes.add(firstTypeArg);
       if (!isPrimitiveType(secondTypeArg))
         implicitlyOptedTypes.add(secondTypeArg);
-    } else if (isParamFieldFormal(param) && isParamEnum(param)) {
+    } else if (isParamEnum(param)) {
       final enumProp = getEnumProp(param);
       final enumValueMap = cleanMap(getEnumValueMap(enumProp, param: param));
       val = _generateMapLookup(
@@ -282,8 +282,8 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
     final field = param.isInitializingFormal
         ? (param as FieldFormalParameterElement).field
         : getMatchingSuperProp(param);
-    final jsonPropType =
-        field != null ? propChecker.firstAnnotationOf(field) : null;
+    final jsonPropType = propChecker.firstAnnotationOf(param) ??
+        (field != null ? propChecker.firstAnnotationOf(field) : null);
     DartObject obj = jsonPropType;
     if (getBase) {
       while (true) {
@@ -352,9 +352,7 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
     ClassElement enumClassEl,
   }) {
     final propChecker = TypeChecker.fromRuntime(EnumValue);
-    final enumElement = enumClassEl ??
-        ((param as FieldFormalParameterElement).field.type.element
-            as ClassElement);
+    final enumElement = enumClassEl ?? (param.type.element as ClassElement);
     final enumFields =
         enumElement.fields.where((e) => e.isEnumConstant).toList();
     final enumValProps = enumFields
@@ -413,9 +411,9 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
     return param.isInitializingFormal;
   }
 
-  bool isParamEnum(FieldFormalParameterElement param) {
-    return param.field.type.element is ClassElement &&
-        (param.field.type.element as ClassElement).isEnum;
+  bool isParamEnum(ParameterElement param) {
+    return param.type.element is ClassElement &&
+        (param.type.element as ClassElement).isEnum;
   }
 
   String _generateInit(

@@ -65,6 +65,7 @@ void main() {
     isActive: true,
     product: product,
     localText: 'ignored text',
+    ownerType: AccountOwnerType.Individual,
     closedDate: DateTime(2020, 5, 16),
     openDate: DateTime(2010, 4, 2),
   );

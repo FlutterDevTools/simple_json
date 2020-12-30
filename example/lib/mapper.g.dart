@@ -80,6 +80,9 @@ final _accountMapper = JsonObjectMapper(
     isActive: mapper.applyFromJsonConverter(json['isActive']),
     product: mapper.deserialize<Product>(json['product'] as Map<String, dynamic>),
     refreshFrequeuncy: mapper.applyFromJsonConverter(json['refreshFrequeuncy']),
+    ownerType: mapper.applyFromJsonConverter(AccountOwnerType.values.firstWhere(
+        (item) => item.toString().split('.')[1].toLowerCase() == json['ownerType']?.toLowerCase(),
+        orElse: () => null)),
     closedDate: mapper.applyFromJsonConverter(json['closedDate'], SpecialDateTimeConverter(true)),
     openDate: mapper.applyFromJsonConverter(json['openingDate']),
   ),
@@ -93,6 +96,7 @@ final _accountMapper = JsonObjectMapper(
     'isActive': mapper.applyFromInstanceConverter(instance.isActive),
     'product': mapper.serializeToMap(instance.product),
     'refreshFrequeuncy': mapper.applyFromInstanceConverter(instance.refreshFrequeuncy),
+    'ownerType': mapper.applyFromInstanceConverter(instance.ownerType?.toString()?.split('.')?.elementAt(1)),
     'closedDate': mapper.applyFromInstanceConverter(instance.closedDate, SpecialDateTimeConverter(true)),
     'openingDate': mapper.applyFromInstanceConverter(instance.openDate),
   },
@@ -124,6 +128,7 @@ final _fieldkeyvaluepairMapper = JsonObjectMapper(
 );
 
 
+
 void init() {
   JsonMapper.register(_productMapper);
   JsonMapper.register(_nestedtestMapper);
@@ -144,5 +149,6 @@ void init() {
   JsonMapper.registerListCast((value) => value?.cast<Test>()?.toList());
   JsonMapper.registerListCast((value) => value?.cast<FieldKeyValuePair>()?.toList());
   JsonMapper.registerListCast((value) => value?.cast<AccountType>()?.toList());
+  JsonMapper.registerListCast((value) => value?.cast<AccountOwnerType>()?.toList());
 }
     

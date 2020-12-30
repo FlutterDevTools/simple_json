@@ -3,7 +3,8 @@ import 'package:simple_json_mapper/simple_json_mapper.dart';
 import 'package:simple_json_example/product.dart';
 
 abstract class BaseAccount {
-  const BaseAccount({this.openDate, this.closedDate});
+  const BaseAccount({this.ownerType, this.openDate, this.closedDate});
+  final AccountOwnerType ownerType;
   @JProp(name: 'openingDate')
   final DateTime openDate;
 
@@ -25,9 +26,10 @@ class Account extends BaseAccount {
       this.product,
       this.localText,
       this.refreshFrequeuncy = const Duration(minutes: 30),
+      AccountOwnerType ownerType,
       DateTime closedDate,
       DateTime openDate})
-      : super(openDate: openDate, closedDate: closedDate);
+      : super(ownerType: ownerType, openDate: openDate, closedDate: closedDate);
 
   final String id;
   @JEnumProp(serializationType: SerializationType.Index)
@@ -60,3 +62,5 @@ enum AccountFeature {
   Cashback,
   Rewards,
 }
+
+enum AccountOwnerType { Individual, Business }

@@ -1,3 +1,6 @@
+## 1.2.1 - 12/30/2020
+* Fix enum value serialization in edge cases.
+
 ## 1.2.0 - 12/20/2020
 * Update dependencies and support nullability language changes.
 
