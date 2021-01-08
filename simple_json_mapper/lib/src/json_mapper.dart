@@ -33,10 +33,11 @@ class JsonMapper {
   static Map<String, dynamic> serializeToMap<T>(T item) =>
       _instance.serializeToMap(item);
 
-  static T deserialize<T>(dynamic jsonVal) => _instance.deserialize(jsonVal);
+  static T deserialize<T>(dynamic jsonVal, [String typeName]) =>
+      _instance.deserialize(jsonVal, typeName);
 
-  static T deserializeFromMap<T>(dynamic jsonVal) =>
-      _instance.deserializeFromMap(jsonVal);
+  static T deserializeFromMap<T>(dynamic jsonVal, [String typeName]) =>
+      _instance.deserializeFromMap(jsonVal, typeName);
 
   static void registerConverter<T>(JsonConverter<dynamic, T> transformer) =>
       _instance.registerConverter(transformer);
@@ -118,25 +119,26 @@ class CustomJsonMapper {
     return typeMap?.toJsonMap(this, item);
   }
 
-  T deserialize<T>(dynamic jsonVal) {
+  T deserialize<T>(dynamic jsonVal, [String typeName]) {
     if (jsonVal == null) return null;
     final decodedJson = jsonVal is String ? json.decode(jsonVal) : jsonVal;
-    final isList = _isList<T>();
+    final isList = _isList<T>(typeName);
     assert(!isList || (isList && decodedJson is List));
     if (isList) {
-      final listCastFn = _listCasts[T.toString()];
+      final listCastFn = _listCasts[typeName ?? T.toString()];
       assert(listCastFn != null);
       final deserializedList = (decodedJson as List)
-          .map((json) => _deserializeFromMapWithType(T.toString(), json))
+          .map((json) =>
+              _deserializeFromMapWithType(typeName ?? T.toString(), json))
           .toList();
       return listCastFn(deserializedList) as T;
     }
 
-    return deserializeFromMap(decodedJson);
+    return deserializeFromMap(decodedJson, typeName);
   }
 
-  T deserializeFromMap<T>(dynamic jsonVal) {
-    return _deserializeFromMapWithType(T.toString(), jsonVal) as T;
+  T deserializeFromMap<T>(dynamic jsonVal, [String typeName]) {
+    return _deserializeFromMapWithType(typeName ?? T.toString(), jsonVal) as T;
   }
 
   dynamic _deserializeFromMapWithType(String typeName, dynamic jsonVal) {
@@ -147,8 +149,8 @@ class CustomJsonMapper {
   static const _ListNameTypeMarker = 'List<';
   static const _ArrayNameTypeMarker = 'Array<';
 
-  bool _isList<T>() {
-    return _isListWithType(T.toString());
+  bool _isList<T>([String typeName]) {
+    return _isListWithType(typeName ?? T.toString());
   }
 
   bool _isListWithType(String typeName) {

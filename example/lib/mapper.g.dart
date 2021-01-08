@@ -39,6 +39,32 @@ final _productMapper = JsonObjectMapper(
 );
 
 
+final _basetestMapper = JsonObjectMapper(
+  (CustomJsonMapper mapper, Map<String, dynamic> json) => BaseTest(
+    name: mapper.applyFromJsonConverter(json['name']),
+    nestedTest: mapper.deserialize<NestedTest>(json['nestedTest'] as Map<String, dynamic>),
+  ),
+  (CustomJsonMapper mapper, BaseTest instance) => <String, dynamic>{
+    'name': mapper.applyFromInstanceConverter(instance.name),
+    'nestedTest': mapper.serializeToMap(instance.nestedTest),
+  },
+);
+
+
+final _testMapper = JsonObjectMapper(
+  (CustomJsonMapper mapper, Map<String, dynamic> json) => Test(
+    name: mapper.applyFromJsonConverter(json['name']),
+    nestedTest: mapper.deserialize<NestedTest>(json['nestedTest'] as Map<String, dynamic>),
+    extraProp: mapper.applyFromJsonConverter(json['extraProp']),
+  ),
+  (CustomJsonMapper mapper, Test instance) => <String, dynamic>{
+    'name': mapper.applyFromInstanceConverter(instance.name),
+    'nestedTest': mapper.serializeToMap(instance.nestedTest),
+    'extraProp': mapper.applyFromInstanceConverter(instance.extraProp),
+  },
+);
+
+
 final _nestedtestMapper = JsonObjectMapper(
   (CustomJsonMapper mapper, Map<String, dynamic> json) => NestedTest(
     ze: mapper.applyFromJsonConverter(json['ze']),
@@ -104,18 +130,6 @@ final _accountMapper = JsonObjectMapper(
 
 
 
-final _testMapper = JsonObjectMapper(
-  (CustomJsonMapper mapper, Map<String, dynamic> json) => Test(
-    name: mapper.applyFromJsonConverter(json['name']),
-    nestedTest: mapper.deserialize<NestedTest>(json['nestedTest'] as Map<String, dynamic>),
-  ),
-  (CustomJsonMapper mapper, Test instance) => <String, dynamic>{
-    'name': mapper.applyFromInstanceConverter(instance.name),
-    'nestedTest': mapper.serializeToMap(instance.nestedTest),
-  },
-);
-
-
 final _fieldkeyvaluepairMapper = JsonObjectMapper(
   (CustomJsonMapper mapper, Map<String, dynamic> json) => FieldKeyValuePair(
     key: mapper.applyFromJsonConverter(json['key']),
@@ -131,10 +145,11 @@ final _fieldkeyvaluepairMapper = JsonObjectMapper(
 
 void init() {
   JsonMapper.register(_productMapper);
+  JsonMapper.register(_basetestMapper);
+  JsonMapper.register(_testMapper);
   JsonMapper.register(_nestedtestMapper);
   JsonMapper.register(_jsonapiresponseMapper);
   JsonMapper.register(_accountMapper);
-  JsonMapper.register(_testMapper);
   JsonMapper.register(_fieldkeyvaluepairMapper); 
 
   JsonMapper.registerConverter(RegExpConverter());
@@ -142,11 +157,12 @@ void init() {
   JsonMapper.registerConverter(UriConverter());
 
   JsonMapper.registerListCast((value) => value?.cast<Product>()?.toList());
+  JsonMapper.registerListCast((value) => value?.cast<BaseTest>()?.toList());
+  JsonMapper.registerListCast((value) => value?.cast<Test>()?.toList());
   JsonMapper.registerListCast((value) => value?.cast<NestedTest>()?.toList());
   JsonMapper.registerListCast((value) => value?.cast<JsonApiResponse>()?.toList());
   JsonMapper.registerListCast((value) => value?.cast<Account>()?.toList());
   JsonMapper.registerListCast((value) => value?.cast<ProductType>()?.toList());
-  JsonMapper.registerListCast((value) => value?.cast<Test>()?.toList());
   JsonMapper.registerListCast((value) => value?.cast<FieldKeyValuePair>()?.toList());
   JsonMapper.registerListCast((value) => value?.cast<AccountType>()?.toList());
   JsonMapper.registerListCast((value) => value?.cast<AccountOwnerType>()?.toList());

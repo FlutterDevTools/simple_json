@@ -22,7 +22,16 @@ void main() {
 
   // Converter for transforming all DateTime string values to a special format defined by the given class.
   // JsonMapper.registerConverter(SpecialDateTimeConverter());
-  final okTest = Test(name: 'hello', nestedTest: NestedTest(ze: 'ok'));
+  final okTest =
+      Test(name: 'hello', nestedTest: NestedTest(ze: 'ok'), extraProp: 'extra');
+  final okTestJson = JsonMapper.serialize(okTest);
+  print('\nSerialized Test:');
+  print(okTestJson);
+  final okTestDeser =
+      JsonMapper.deserialize<BaseTest>(okTestJson, (Test).toString());
+  print('\nRe-serialized Test:');
+  print(JsonMapper.serialize(okTestDeser as Test));
+
   final product = Product(
       name: 'Test',
       type: ProductType.Shoe,

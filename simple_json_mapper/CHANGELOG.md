@@ -1,3 +1,6 @@
+## 1.1.3 - 01/08/2021
+* Support de-serialization using `typeName`.
+
 ## 1.1.2 - 08/31/2020
 * Support `Duration` class serialization.
 

@@ -1,9 +1,20 @@
 import 'package:simple_json_mapper/simple_json_mapper.dart';
 
-class Test {
-  const Test({this.name, this.nestedTest});
+@JObj()
+class BaseTest {
+  const BaseTest({this.name, this.nestedTest});
   final String name;
   final NestedTest nestedTest;
+}
+
+@JObj()
+class Test extends BaseTest {
+  const Test({
+    String name,
+    NestedTest nestedTest,
+    this.extraProp,
+  }) : super(name: name, nestedTest: nestedTest);
+  final String extraProp;
 }
 
 @JObj()
