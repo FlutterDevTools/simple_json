@@ -15,11 +15,12 @@ void main() {
   print('Serialized JSON:');
   print(jsonStr);
   print('\nDeserialized and re-serialized JSON:');
-  print(JsonMapper.serialize(JsonMapper.deserialize<Test>(jsonStr)));
+  final obj = JsonMapper.deserialize<Test>(jsonStr);
+  print(obj != null ? JsonMapper.serialize(obj) : obj);
 }
 
 @JsonObject()
 class Test {
-  const Test({this.name});
+  const Test({required this.name});
   final String name;
 }

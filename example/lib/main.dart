@@ -66,7 +66,7 @@ void main() {
   final account = Account(
     id: Uuid().v4(),
     type: AccountType.Checking,
-    // features: [AccountFeature.Cashback, AccountFeature.Rewards],
+    features: [AccountFeature.Cashback, AccountFeature.Rewards],
     name: 'Test',
     number: 'xxx12414',
     amount: 100.50,

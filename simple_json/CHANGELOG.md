@@ -1,3 +1,5 @@
+## 1.2.2 - 01/15/2020
+* Support List of enum.
 ## 1.2.1 - 12/30/2020
 * Fix enum value serialization in edge cases.
 

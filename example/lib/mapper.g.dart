@@ -5,6 +5,7 @@ import 'package:simple_json_mapper/simple_json_mapper.dart';
 import 'package:simple_json_example/product.dart';
 import 'package:simple_json_example/test.dart';
 import 'package:simple_json_example/account.dart';
+import 'dart:core';
 import 'package:simple_json_example/converters/regex.dart';
 import 'package:simple_json_example/converters/special_datetime.dart';
 import 'package:simple_json_example/converters/uri.dart';
@@ -13,7 +14,7 @@ final _productMapper = JsonObjectMapper(
   (CustomJsonMapper mapper, Map<String, dynamic> json) => Product(
     name: mapper.applyFromJsonConverter(json['name']),
     type: mapper.applyFromJsonConverter(ProductType.values.firstWhere(
-        (item) => item.toString().split('.')[1].toLowerCase() == json['type']?.toLowerCase(),
+        (value) => value?.toString()?.split('.')?.elementAt(1)?.toLowerCase() == json['type']?.toLowerCase(),
         orElse: () => null)),
     expiry: mapper.applyFromJsonConverter(json['expiry']),
     productDetails: mapper.applyFromJsonConverter(json['productDetails']),
@@ -97,8 +98,11 @@ final _accountMapper = JsonObjectMapper(
   (CustomJsonMapper mapper, Map<String, dynamic> json) => Account(
     id: mapper.applyFromJsonConverter(json['id']),
     type: mapper.applyFromJsonConverter(AccountType.values.firstWhere(
-        (item) => ({0: 25, 1: 10}[item.index] ?? item.index) == json['type'],
+        (value) => ({0: 25, 1: 10}[value?.index] ?? value?.index) == json['type'],
         orElse: () => null)),
+    features: (json['features'] as List)?.map((dynamic item) => mapper.applyFromJsonConverter<AccountFeature>(AccountFeature.values.firstWhere(
+        (value) => value?.toString()?.split('.')?.elementAt(1)?.toLowerCase() == item?.toString()?.toLowerCase(),
+        orElse: () => null)))?.toList(),
     name: mapper.applyFromJsonConverter(json['name']),
     number: mapper.applyFromJsonConverter(json['number']),
     amount: mapper.applyFromJsonConverter(json['amount']),
@@ -107,7 +111,7 @@ final _accountMapper = JsonObjectMapper(
     product: mapper.deserialize<Product>(json['product'] as Map<String, dynamic>),
     refreshFrequeuncy: mapper.applyFromJsonConverter(json['refreshFrequeuncy']),
     ownerType: mapper.applyFromJsonConverter(AccountOwnerType.values.firstWhere(
-        (item) => item.toString().split('.')[1].toLowerCase() == json['ownerType']?.toLowerCase(),
+        (value) => value?.toString()?.split('.')?.elementAt(1)?.toLowerCase() == json['ownerType']?.toLowerCase(),
         orElse: () => null)),
     closedDate: mapper.applyFromJsonConverter(json['closedDate'], SpecialDateTimeConverter(true)),
     openDate: mapper.applyFromJsonConverter(json['openingDate']),
@@ -115,6 +119,7 @@ final _accountMapper = JsonObjectMapper(
   (CustomJsonMapper mapper, Account instance) => <String, dynamic>{
     'id': mapper.applyFromInstanceConverter(instance.id),
     'type': mapper.applyFromInstanceConverter(({0: 25, 1: 10}[instance.type?.index] ?? instance.type?.index)),
+    'features': instance.features?.map((item) => item?.toString()?.split('.')?.elementAt(1))?.toList(),
     'name': mapper.applyFromInstanceConverter(instance.name),
     'number': mapper.applyFromInstanceConverter(instance.number),
     'amount': mapper.applyFromInstanceConverter(instance.amount),
@@ -143,6 +148,8 @@ final _fieldkeyvaluepairMapper = JsonObjectMapper(
 
 
 
+
+
 void init() {
   JsonMapper.register(_productMapper);
   JsonMapper.register(_basetestMapper);
@@ -165,6 +172,8 @@ void init() {
   JsonMapper.registerListCast((value) => value?.cast<ProductType>()?.toList());
   JsonMapper.registerListCast((value) => value?.cast<FieldKeyValuePair>()?.toList());
   JsonMapper.registerListCast((value) => value?.cast<AccountType>()?.toList());
+  JsonMapper.registerListCast((value) => value?.cast<AccountFeature>()?.toList());
+  JsonMapper.registerListCast((value) => value?.cast<List>()?.toList());
   JsonMapper.registerListCast((value) => value?.cast<AccountOwnerType>()?.toList());
 }
     

@@ -2,7 +2,8 @@ abstract class JsonConverter<TFrom, TTo> {
   const JsonConverter();
 
   factory JsonConverter.fromFunction(
-      {TTo Function(TFrom value) fromJson, TFrom Function(TTo value) toJson}) {
+      {required TTo Function(TFrom value) fromJson,
+      required TFrom Function(TTo value) toJson}) {
     return JsonObjectConverter<TFrom, TTo>(
         fromJsonFn: fromJson, toJsonFn: toJson);
   }
@@ -15,7 +16,7 @@ abstract class JsonConverter<TFrom, TTo> {
 }
 
 class JsonObjectConverter<TFrom, TTo> extends JsonConverter<TFrom, TTo> {
-  const JsonObjectConverter({this.fromJsonFn, this.toJsonFn});
+  const JsonObjectConverter({required this.fromJsonFn, required this.toJsonFn});
   final TTo Function(TFrom value) fromJsonFn;
   final TFrom Function(TTo value) toJsonFn;
 
