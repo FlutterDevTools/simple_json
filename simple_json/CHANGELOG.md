@@ -1,3 +1,7 @@
+## 2.1.1 - 03/22/2021
+
+- Enum `orElse` `null` bug fix.
+
 ## 2.1.0 - 03/21/2021
 
 - Support null safety.

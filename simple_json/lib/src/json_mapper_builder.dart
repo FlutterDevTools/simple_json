@@ -212,11 +212,11 @@ final _${elementName.toLowerCase()}Mapper = JsonObjectMapper(
       {String? compare}) {
     final isIndex = enumProp.serializationType == SerializationType.Index;
     final value = isIndex
-        ? 'value.index'
-        : "value.toString().split('.').elementAt(1).toLowerCase()";
-    return '''${type.element!.name}.values.firstWhere(
+        ? 'value!.index'
+        : "value!.toString().split('.').elementAt(1).toLowerCase()";
+    return '''${type.element!.name}.values.cast<${type.element!.name}?>().firstWhere(
         (value) => ${_generateMapLookup(enumValueMap, value)} == ${compare != null ? compare : "json['$name']"}${!isIndex ? '.toLowerCase()' : ''},
-        orElse: () => null as ${type.element!.name})''';
+        orElse: () => null)''';
   }
 
   String? _generateToMapItem(ParameterElement param) {
