@@ -2,7 +2,7 @@ import 'package:simple_json_mapper/simple_json_mapper.dart';
 
 @JObj()
 class BaseTest {
-  const BaseTest({this.name, this.nestedTest});
+  const BaseTest({required this.name, required this.nestedTest});
   final String name;
   final NestedTest nestedTest;
 }
@@ -10,16 +10,16 @@ class BaseTest {
 @JObj()
 class Test extends BaseTest {
   const Test({
-    String name,
-    NestedTest nestedTest,
+    required String name,
+    required NestedTest nestedTest,
     this.extraProp,
   }) : super(name: name, nestedTest: nestedTest);
-  final String extraProp;
+  final String? extraProp;
 }
 
 @JObj()
 class NestedTest {
-  const NestedTest({this.ze, this.data});
+  const NestedTest({required this.ze, this.data});
   final dynamic data;
   final String ze;
 }
@@ -28,8 +28,8 @@ class NestedTest {
 class JsonApiResponse {
   const JsonApiResponse({
     this.errorData,
-    this.errorMessage,
-    this.fieldErrors,
+    required this.errorMessage,
+    required this.fieldErrors,
     this.data,
   });
 
@@ -40,7 +40,7 @@ class JsonApiResponse {
 }
 
 class FieldKeyValuePair {
-  const FieldKeyValuePair({this.key, this.value});
+  const FieldKeyValuePair({required this.key, required this.value});
   final String key;
   final String value;
 }

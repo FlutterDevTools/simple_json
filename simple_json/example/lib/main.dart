@@ -15,6 +15,6 @@ void main() {
 
 @JObj()
 class Test {
-  const Test({this.name});
+  const Test({required this.name});
   final String name;
 }

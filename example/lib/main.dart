@@ -1,7 +1,5 @@
 import 'package:simple_json_example/converters/regex.dart';
-import 'package:simple_json_example/converters/special_datetime.dart';
 import 'package:simple_json_example/converters/uri.dart';
-import 'package:simple_json_example/wrapper.dart';
 import 'package:simple_json_mapper/simple_json_mapper.dart';
 import 'package:simple_json_example/account.dart';
 import 'package:simple_json_example/product.dart';
@@ -22,7 +20,7 @@ void main() {
 
   // Converter for transforming all DateTime string values to a special format defined by the given class.
   // JsonMapper.registerConverter(SpecialDateTimeConverter());
-  final okTest =
+  const okTest =
       Test(name: 'hello', nestedTest: NestedTest(ze: 'ok'), extraProp: 'extra');
   final okTestJson = JsonMapper.serialize(okTest);
   print('\nSerialized Test:');
@@ -30,7 +28,7 @@ void main() {
   final okTestDeser =
       JsonMapper.deserialize<BaseTest>(okTestJson, (Test).toString());
   print('\nRe-serialized Test:');
-  print(JsonMapper.serialize(okTestDeser as Test));
+  print(JsonMapper.serialize(okTestDeser));
 
   final product = Product(
       name: 'Test',
@@ -41,7 +39,7 @@ void main() {
       sizes: [10, 8, 5.5],
       tests: [
         okTest,
-        Test(name: 'blah', nestedTest: NestedTest(ze: 'he')),
+        const Test(name: 'blah', nestedTest: NestedTest(ze: 'he')),
       ],
       attributes: {'top': 'kek'},
       parent: Product(
@@ -64,7 +62,7 @@ void main() {
   //     JsonMapper.deserialize<Wrapper<Product>>(serializedWrapper)));
 
   final account = Account(
-    id: Uuid().v4(),
+    id: const Uuid().v4(),
     type: AccountType.Checking,
     features: [AccountFeature.Cashback, AccountFeature.Rewards],
     name: 'Test',
@@ -95,8 +93,8 @@ void main() {
         fromJson: (value) => value == 1 ? true : false,
         toJson: (value) => value ? 1 : 0,
       ),
-      RegExpConverter(),
-      UriConverter(),
+      const RegExpConverter(),
+      const UriConverter(),
     ],
   );
   // Note the usage of [customerMapper] here.

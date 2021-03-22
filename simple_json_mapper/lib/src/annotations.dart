@@ -8,9 +8,9 @@ class JsonObject {
 
 class JProp extends JsonProperty {
   const JProp({
-    required bool ignore,
-    required String name,
-    dynamic defaultValue,
+    bool? ignore,
+    String? name,
+    dynamic? defaultValue,
   }) : super(
           ignore: ignore,
           name: name,
@@ -20,13 +20,13 @@ class JProp extends JsonProperty {
 
 class JsonProperty {
   const JsonProperty({
-    required this.ignore,
-    required this.name,
+    this.ignore,
+    this.name,
     this.defaultValue,
   });
-  final bool ignore;
-  final String name;
-  final dynamic defaultValue;
+  final bool? ignore;
+  final String? name;
+  final dynamic? defaultValue;
 }
 
 enum SerializationType {
@@ -35,12 +35,13 @@ enum SerializationType {
 }
 
 class JsonEnumProperty {
-  const JsonEnumProperty({required this.serializationType});
+  const JsonEnumProperty({this.serializationType = SerializationType.Value});
   final SerializationType serializationType;
 }
 
 class JEnumProp extends JsonEnumProperty {
-  const JEnumProp({required SerializationType serializationType})
+  const JEnumProp(
+      {SerializationType serializationType = SerializationType.Value})
       : super(serializationType: serializationType);
 }
 

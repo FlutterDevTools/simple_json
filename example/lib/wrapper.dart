@@ -3,7 +3,7 @@ import 'package:simple_json_mapper/simple_json_mapper.dart';
 
 // @JObj()
 class Wrapper<T> {
-  Wrapper({this.data, this.test});
+  Wrapper({required this.data, required this.test});
   final T data;
   final Test test;
 }

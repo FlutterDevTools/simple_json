@@ -3,7 +3,10 @@ import 'package:simple_json_mapper/simple_json_mapper.dart';
 import 'package:simple_json_example/product.dart';
 
 abstract class BaseAccount {
-  const BaseAccount({this.ownerType, this.openDate, this.closedDate});
+  const BaseAccount(
+      {required this.ownerType,
+      required this.openDate,
+      required this.closedDate});
   final AccountOwnerType ownerType;
   @JProp(name: 'openingDate')
   final DateTime openDate;
@@ -15,29 +18,30 @@ abstract class BaseAccount {
 
 class Account extends BaseAccount {
   const Account(
-      {this.id,
-      this.type,
-      this.features,
+      {required this.id,
+      required this.type,
+      required this.features,
       this.name,
-      this.number,
-      this.amount,
-      this.transactionCount,
-      this.isActive,
-      this.product,
+      required this.number,
+      required this.amount,
+      required this.transactionCount,
+      required this.isActive,
+      required this.product,
       this.localText,
       this.refreshFrequeuncy = const Duration(minutes: 30),
-      AccountOwnerType ownerType,
-      DateTime closedDate,
-      DateTime openDate})
+      required AccountOwnerType ownerType,
+      required DateTime closedDate,
+      required DateTime openDate})
       : super(ownerType: ownerType, openDate: openDate, closedDate: closedDate);
 
   final String id;
   @JEnumProp(serializationType: SerializationType.Index)
   final AccountType type;
   final List<AccountFeature> features;
-  final String name;
+  final String? name;
   final String number;
   final double amount;
+
   final Duration refreshFrequeuncy;
 
   @JsonProperty(name: 'tranCount', defaultValue: 11)
@@ -46,7 +50,7 @@ class Account extends BaseAccount {
   final bool isActive;
 
   @JProp(ignore: true)
-  final String localText;
+  final String? localText;
 
   final Product product;
 }
@@ -54,6 +58,7 @@ class Account extends BaseAccount {
 enum AccountType {
   @EnumValue(value: 25)
   Savings,
+
   @EnumValue(value: 10)
   Checking
 }

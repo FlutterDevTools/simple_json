@@ -6,25 +6,25 @@ enum ProductType { Shoe, Shirt, Bottom }
 @JsonObject()
 class Product {
   const Product({
-    this.name,
+    required this.name,
     this.type,
-    this.expiry,
-    this.productDetails,
+    required this.expiry,
+    required this.productDetails,
     this.sizes,
-    this.tests,
-    this.productMatchPattern,
-    this.attributes,
+    required this.tests,
+    required this.productMatchPattern,
+    required this.attributes,
     this.parent,
     this.timeline,
   });
   final String name;
-  final ProductType type;
+  final ProductType? type;
   final DateTime expiry;
   final Uri productDetails;
   final RegExp productMatchPattern;
-  final List<double> sizes;
+  final List<double>? sizes;
   final List<Test> tests;
   final Map<String, String> attributes;
-  final Product parent;
-  final List<DateTime> timeline;
+  final Product? parent;
+  final List<DateTime>? timeline;
 }
