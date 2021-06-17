@@ -333,9 +333,11 @@ packages:
   simple_json_mapper:
     dependency: "direct main"
     description:
-      name: simple_json_mapper
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: simple_json_mapper
+      ref: HEAD
+      resolved-ref: "49290a87e64c385ef71a972755614e3d9388f9c3"
+      url: "git://github.com/cocoatech/simple_json"
+    source: git
     version: "2.1.0"
   source_gen:
     dependency: "direct main"

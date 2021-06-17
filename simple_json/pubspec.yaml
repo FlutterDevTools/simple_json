@@ -6,8 +6,13 @@ homepage: https://github.com/FlutterDevTools/simple_json/tree/master/simple_json
 environment:
   sdk: '>=2.12.0 <3.0.0'
 
+publish_to: none
+
 dependencies:
-  simple_json_mapper: ^2.1.0
+  simple_json_mapper: 
+    git: 
+      url: git://github.com/cocoatech/simple_json
+      path: simple_json_mapper
   build_resolvers: ^2.0.3
   analyzer: ^1.7.1
   build: ^2.0.2
