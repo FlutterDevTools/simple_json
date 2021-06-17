@@ -10,7 +10,7 @@ class JProp extends JsonProperty {
   const JProp({
     bool? ignore,
     String? name,
-    dynamic? defaultValue,
+    dynamic defaultValue,
   }) : super(
           ignore: ignore,
           name: name,
@@ -26,7 +26,7 @@ class JsonProperty {
   });
   final bool? ignore;
   final String? name;
-  final dynamic? defaultValue;
+  final dynamic defaultValue;
 }
 
 enum SerializationType {

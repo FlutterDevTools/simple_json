@@ -209,7 +209,7 @@ class CustomJsonMapper {
         : value;
   }
 
-  dynamic? applyDynamicFromInstanceConverter<TTo>(TTo value,
+  dynamic applyDynamicFromInstanceConverter<TTo>(TTo value,
       [JsonConverter<dynamic, TTo>? converter]) {
     return applyFromInstanceConverter(value, converter);
   }
