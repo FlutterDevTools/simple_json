@@ -64,6 +64,8 @@ class CustomJsonMapper {
   final _toTypeConverterMap = <String, JsonConverter>{
     (DateTime).toString(): const DefaultISO8601DateConverter(),
     (Duration).toString(): const DefaultDurationConverter(),
+    'DateTime?': const DefaultISO8601DateConverter(),
+    'Duration?': const DefaultDurationConverter(),
   };
 
   bool isMapperRegistered<T>() {
