@@ -1,3 +1,7 @@
+## 2.2.0 - 09/07/2021
+
+- Update dependencies.
+
 ## 2.1.1 - 03/22/2021
 
 - Enum `orElse` `null` bug fix.

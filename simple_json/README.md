@@ -68,10 +68,10 @@ Using `simple_json`, this `StorageService` has a simple generic type-safe API th
 pubspec.yaml (**Note**: `simple_json` must be added under `dev_dependencies`)
 ```yaml
 dependencies:
-  simple_json_mapper: ^2.1.0
+  simple_json_mapper: ^2.2.0
 
 dev_dependencies:
-  simple_json: ^2.1.1
+  simple_json: ^2.2.0
   build_runner: ^1.10.0
 ```
 

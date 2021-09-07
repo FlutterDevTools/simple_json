@@ -1,3 +1,7 @@
+## 2.2.0 - 09/07/2021
+
+- Update dependencies.
+
 ## 2.1.0 - 03/21/2021
 
 - Fix typings and bugs.

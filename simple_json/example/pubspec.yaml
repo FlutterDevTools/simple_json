@@ -8,7 +8,7 @@ environment:
   sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
-  simple_json_mapper: ^2.1.0
+  simple_json_mapper: ^2.2.0
   simple_json:
     path: ../
 
@@ -17,4 +17,4 @@ dependency_overrides:
     path: ../../simple_json_mapper
 
 dev_dependencies:
-  build_runner: ^1.12.2
+  build_runner: ^2.1.2
